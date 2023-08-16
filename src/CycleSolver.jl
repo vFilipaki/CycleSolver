@@ -5,16 +5,14 @@ include("Visualization.jl")
 include("Components.jl")
 include("MassFlowManager.jl")
 
-testListTemp = []
+
 
 System = nothing
 SystemCycles = Any[]
-SystemVars = Any[]
+
 SystemStates = Any[]
 
-unsolvedEquations = Any[]
 unsolvedStates = Any[]
-unsolvedConditionalEquation = Any[]
     
 massEquations = Any[]
 massParent = Any[]
@@ -64,7 +62,7 @@ end
 macro solve(eqs)
     # println("\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n")
     # println("\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n")
-    ClearVars()
+    ClearSystem()
 
     global SystemVars = Any[]
     for i in eqs.args[2:2:end]
@@ -354,25 +352,17 @@ function SttCycleIndex(sttName)
     end end
 end
 
-function ClearVars()
+function ClearSystem()
     set_reference_state("R134a","ASHRAE")
-    for i in SystemVars
-        if i isa Expr
-            if !(i.head == :.)
-                eval(Expr(:(=), i.args[1], nothing))
-            end
-        else
-            eval(Expr(:(=), i, nothing))
-    end end
+    
     for i in SystemCycles
         for j in i.states
             eval(Expr(:(=), j.name, nothing))
-    end end
+    end end    
 
-    global SystemVars = Any[]
-    global unsolvedEquations = Any[]
+    ClearEquations()
+
     global unsolvedStates = Any[]
-    global unsolvedConditionalEquation = Any[]
     global SystemStates = Any[]        
     global massEquations = Any[]
     global MassEq1 = Any[]

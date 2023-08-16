@@ -1,5 +1,9 @@
 using Symbolics
 
+SystemVars = Any[]
+unsolvedEquations = Any[]
+unsolvedConditionalEquation = Any[]
+
 mutable struct MathEq
     Eq
     vars
@@ -19,7 +23,7 @@ function NewEquation(eq)
             ManageExpression(i)                
         end
         newEquation = MathEq()
-        eq = Expr(:call, :(~), eq.args[1], eq.args[2]) 
+        eq = Expr(:call, :(~), eq.args[1], eq.args[2])
         newEquation.Eq = CrossMultiplication(eval(eq))
         newEquation.vars = GetEquationVariables(Meta.parse(string(newEquation.Eq)))
         push!(unsolvedEquations, newEquation)
@@ -157,7 +161,6 @@ function ManageConditionalEquations(eq)
         if !(checkCondition isa Bool)
             checkCondition = UpdateEq(checkCondition)
         end
-        push!(testListTemp, eq[i].condition)
         if checkCondition isa Bool
             if checkCondition
                 for j in eq[i].caseTrue
@@ -406,4 +409,19 @@ function CreateVariable(var)
         eval(Expr(:(=), var, var2))
         eval(Expr(:(=), var2, :nothing))
     end    
+end
+
+function ClearEquations()
+    for i in SystemVars
+        if i isa Expr
+            if !(i.head == :.)
+                eval(Expr(:(=), i.args[1], nothing))
+            end
+        else
+            eval(Expr(:(=), i, nothing))
+    end end
+
+    global SystemVars = Any[]
+    global unsolvedEquations = Any[]
+    global unsolvedConditionalEquation = Any[]
 end

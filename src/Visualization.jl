@@ -58,7 +58,12 @@ function TSGraph(cycles)
         fluidTemp = SystemCycles[c].states[1].fluid
 
         AlltRange = Any[SystemCycles[c].states[1].T, SystemCycles[c].states[1].T]
+        isVapor = true
         for i in SystemCycles[c].states
+            try
+                isVapor &= i.T > PropsSI("T", "P", i.p * 1000, "Q", 0, fluidTemp)
+            catch
+            end
             if i.T > AlltRange[2]
                 AlltRange[2] = i.T
             end
@@ -68,7 +73,7 @@ function TSGraph(cycles)
         end
         sizeRangeT = AlltRange[2] - AlltRange[1]
 
-        if AlltRange[1] < PropsSI("Tcrit", fluidTemp)
+        if !isVapor
             res = 15
             tvec = Array{Any}(nothing, 2*res+1)
             svec = Array{Any}(nothing, 2*res+1)
@@ -128,6 +133,12 @@ function TSGraph(cycles)
                                 push!(s, PropsSI("S", "P", localSt2.p * 1000, "Q", localSt2.T < localSt1.T ? 0 : 1, fluidTemp)/1000)
                                 push!(t, tQ0)
                             end
+                        elseif (tTemp == tQ0)
+                            push!(s, PropsSI("S", "P", localSt2.p * 1000, "Q", localSt2.T < localSt1.T ? 1 : 0, fluidTemp)/1000)
+                            push!(t, tQ0)
+
+                            push!(s, PropsSI("S", "P", localSt2.p * 1000, "Q", localSt2.T < localSt1.T ? 0 : 1, fluidTemp)/1000)
+                            push!(t, tQ0)
                         end
                         signQ0 = tTemp > tQ0
                         if abs(tTemp - tQ0) > 1
@@ -193,9 +204,17 @@ function TSGraph(cycles)
                 if PropsSI("Tmax", fluidTemp) < tRange[2] 
                     tRange[2] = PropsSI("Tmax", fluidTemp)
                 end
-                
-                if tRange[1] < PropsSI("Tcrit", fluidTemp)
+
+                if !isVapor 
                     tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+                else
+                    try
+                        if tRange[1] < PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+                            tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+                        end
+                    catch
+                        tRange[1] += sizeRangeT * 0.1
+                    end
                 end
 
                 t = Any[]
