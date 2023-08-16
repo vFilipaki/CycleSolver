@@ -1,3 +1,7 @@
-using Test, CycleSolver
+using Test, Documenter, CycleSolver
 
-@test FirstTest("123") == "123"
+include("equations.test.jl")
+
+@testset "DocTests for CycleSolver" begin
+    doctest(CycleSolver; manual = false)
+end
