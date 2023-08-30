@@ -8,4 +8,4 @@ The `CycleSolver.jl` package uses metaprogramming to provide a unique formatting
 
 ## Documentation
 
-For information on how to use the package, see the ![documentation](https://vfilipaki.github.io/CycleSolver.jl/dev/).
+For information on how to use the package, see the [documentation](https://vfilipaki.github.io/CycleSolver.jl/dev/).
