@@ -1,10 +1,21 @@
 name = "CycleSolver"
-uuid = "097fe7cc-8598-41c2-8c99-39ea8c8a19f7"
-authors = ["Vinicius Filipaki"]
-version = "0.1.0"
+uuid = "3b43121a-1122-4a83-b2b6-7ec1eb6161aa"
+authors = ["Vinícius Filipaki"]
+version = "1.0.0-DEV"
 
 [deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterTools = "35a29f4d-8980-5a13-9543-d66fff28ecb8"
 CoolProp = "e084ae63-2819-5025-826e-f8e611a84251"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

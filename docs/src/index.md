@@ -1,7 +1,3 @@
-# Example
+# CycleSolver.jl
 
-First Version CycleSolver
-
-```@autodocs
-Modules = [CycleSolver]
-```
+Documentation for CycleSolver.jl

@@ -1,5 +1,15 @@
-using Documenter, CycleSolver
+using Documenter
+using CycleSolver
 
-makedocs(modules = [CycleSolver], sitename = "CycleSolver.jl")
+makedocs(
+    sitename = "CycleSolver",
+    format = Documenter.HTML(),
+    modules = [CycleSolver]
+)
 
-deploydocs(repo = "github.com/CycleSolver.jl.git")
+# Documenter can also automatically deploy documentation to gh-pages.
+# See "Hosting Documentation" and deploydocs() in the Documenter manual
+# for more information.
+#=deploydocs(
+    repo = "<repository url>"
+)=#
