@@ -9,3 +9,20 @@ The `CycleSolver.jl` package uses metaprogramming to provide a unique formatting
 ## Documentation
 
 For information on how to use the package, see the [documentation](https://vfilipaki.github.io/CycleSolver.jl/dev/).
+
+## Citations
+
+How to cite this project:
+
+```bibtex
+@Misc{2023-FilipakiV-CycleSolver,
+  author       = {V. Filipaki},
+  title        = {{CycleSolver.jl} -- Solver for thermodynamic cycles},
+  howpublished = {Online},
+  month        = {August},
+  year         = {2023},
+  journal      = {GitHub repository},
+  publisher    = {GitHub},
+  url          = {https://github.com/vFilipaki/CycleSolver.jl},
+}
+```
