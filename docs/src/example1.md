@@ -26,6 +26,8 @@
     CycleSolver.PrintResults()
     ```
 
+#### Output:
+
 ```@raw html
 <div style='display: inline-block; margin: 1px; text-align: center;
     border: 0.5px solid #666666;'><div style='display: inline-block; padding: 15px; margin: 20px;
