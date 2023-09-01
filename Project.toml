@@ -12,7 +12,9 @@ PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [compat]
-julia = "1"
+julia = "^1.8"
+Symbolics = "5"
+PrettyTables = "2"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
