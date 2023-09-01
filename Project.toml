@@ -16,9 +16,9 @@ julia = "^1.8"
 Symbolics = "5"
 PrettyTables = "2"
 Plots = "1"
-DocumenterTools = "0"
-Documenter = "0"
-CoolProp = "0"
+DocumenterTools = "^0.1.16"
+Documenter = "^0.27.24"
+CoolProp = "^0.1.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
