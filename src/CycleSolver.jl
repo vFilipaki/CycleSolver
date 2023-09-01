@@ -60,8 +60,6 @@ mutable struct PropertiesStruct
 end
 
 macro solve(eqs)
-    # println("\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n")
-    # println("\n \n \n \n \n \n \n \n \n \n \n \n \n \n \n")
     ClearSystem()
 
     global SystemVars = Any[]
@@ -415,7 +413,6 @@ function EquationStateSolver(tempVarZ, solutionFinded)
                         EquationStateSolver(string(tempVarZ, "   "), solutionFinded)
                         newValue = oldLenght < length(solutionFinded)
                         for j in solutionFinded
-                            println(tempVarZ,"~~~~~ ", Expr(:(=), j[1], j[2]))
                             eval(Expr(:(=), j[1], j[2]))
                         end
                     end
@@ -434,7 +431,6 @@ function EquationStateSolver(tempVarZ, solutionFinded)
             end             
             RestoreCheckPoint(localCheckPoint)
             if acceptedCondition
-                println(tempVarZ," > ", tryValue)
                 push!(solutionFinded, Any[
                     :(unsolvedConditionalEquation[$i].condition), 
                     tryValue])
@@ -510,7 +506,6 @@ function EquationStateSolver(tempVarZ, solutionFinded)
             eval(Expr(:(=), j[1], j[2]))
             return nothing
         end
-        println(tempVarZ, "::::::: ", guesses)
         smaller = Any[100000, -1, nothing] 
         errorCount = 0
         valuesQuery = Any[]
@@ -552,9 +547,6 @@ function EquationStateSolver(tempVarZ, solutionFinded)
                     push!(valuesQuery, testValue)
                     validIntervalStarted = true
                     errorCount = 0
-                    # println("Q: ", st6.Q, ", S: ", stE1.s, " >> ", testValue)
-
-                    # println(tempVarZ^2, testValue)
                 elseif validIntervalStarted    
                     errorCount += 1
                 end
@@ -581,7 +573,6 @@ function EquationStateSolver(tempVarZ, solutionFinded)
                 endWhile = true
             end
             if i + guesses[4] > guesses[3] || endWhile
-                # println("!!! ", smaller)
                 if smaller[2] == -1
                     go2nextGuess = true
                     break
@@ -596,7 +587,6 @@ function EquationStateSolver(tempVarZ, solutionFinded)
                     validIntervalStarted = false
                     go2nextGuess = false
                 else
-                    # println(smaller)
                     break
                 end
             else
@@ -612,7 +602,6 @@ function EquationStateSolver(tempVarZ, solutionFinded)
     if isnothing(smaller[3]) || smaller[1] > 0.001
         return nothing
     end
-    println("   >>>>>  : ", smaller)
     push!(solutionFinded, Any[smaller[3], smaller[2]])
 end
 
@@ -630,12 +619,7 @@ end
 
 function RestoreCheckPoint(checkPoint)
     global unsolvedEquations = deepcopy(checkPoint[2])
-    global unsolvedConditionalEquation = deepcopy(checkPoint[7])
-    # println("\n\n\n:::::::::::::::::::")
-    # for j in 1:length(SystemVars)
-    #     println(j, " >> ", SystemVars[j], " ", checkPoint[3][j])
-    #     eval(Expr(:(=), SystemVars[j], checkPoint[3][j]))
-    # end        
+    global unsolvedConditionalEquation = deepcopy(checkPoint[7])      
     for j in 1:length(SystemStates)
         for f in fieldnames(Stt)
             setfield!(SystemStates[j], f, getfield(checkPoint[4][j], f))
