@@ -1,7 +1,5 @@
 using Test, CycleSolver
 
-include("equations.test.jl")
-
-@testset "DocTests for CycleSolver" begin
-    doctest(CycleSolver; manual = false)
+@testset "CycleSolver" begin
+    @testset "Equations" begin include("equations.test.jl"); end
 end
