@@ -1,6 +1,9 @@
 using CoolProp
 set_reference_state("R134a","ASHRAE")
 
+SystemStates = Any[]
+unsolvedStates = Any[]
+
 mutable struct Stt
     T
     p
@@ -162,4 +165,16 @@ function createState(state)
     eval(Expr(:(=), state2.args[1], :nothing))
     push!(unsolvedStates, sttClass)
     push!(SystemStates, sttClass)
+end
+
+function clearStates()
+    for j in SystemStates
+        eval(Expr(:(=), j.name, nothing))
+    end 
+    # for i in SystemCycles
+    #     for j in i.states
+    #         eval(Expr(:(=), j.name, nothing))
+    # end end 
+    global unsolvedStates = Any[]
+    global SystemStates = Any[]
 end

@@ -9,10 +9,6 @@ include("MassFlowManager.jl")
 
 System = nothing
 SystemCycles = Any[]
-
-SystemStates = Any[]
-
-unsolvedStates = Any[]
     
 massEquations = Any[]
 massParent = Any[]
@@ -353,15 +349,10 @@ end
 function ClearSystem()
     set_reference_state("R134a","ASHRAE")
     
-    for i in SystemCycles
-        for j in i.states
-            eval(Expr(:(=), j.name, nothing))
-    end end    
+    clearStates()       
 
     ClearEquations()
-
-    global unsolvedStates = Any[]
-    global SystemStates = Any[]        
+     
     global massEquations = Any[]
     global MassEq1 = Any[]
     global massParent = Any[]
