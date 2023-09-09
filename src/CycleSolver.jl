@@ -5,24 +5,13 @@ include("Visualization.jl")
 include("Components.jl")
 include("MassFlowManager.jl")
 
-
-
 System = nothing
 SystemCycles = Any[]
     
-massEquations = Any[]
-massParent = Any[]
-
-MassEq1 = Any[]    
-MassCoef = Any[]
 fluidDefault = "water"
-fluidEq = Any[]
-closedInteractions = Any[]
 cycleProps = Any[]
 isRefrigerationSystem = nothing
 
-m_fraction = Any[]
-m_Cycle = Any[]
 stAux = Any[]
 
 find = :find
@@ -351,20 +340,14 @@ function ClearSystem()
     
     clearStates()       
 
-    ClearEquations()
-     
-    global massEquations = Any[]
-    global MassEq1 = Any[]
-    global massParent = Any[]
+    ClearEquations()   
+
+    clearMassVariables()
+
     global SystemCycles = Any[]
-    global MassCoef = Any[]
     global fluidDefault = "water"
-    global fluidEq = Any[]
-    global closedInteractions = Any[]
     global cycleProps = Any[]
     global isRefrigerationSystem = false
-    global m_fraction = Any[]
-    global m_Cycle = Any[]
     global stAux = Any[]    
     global System = PropertiesStruct()   
     global PropsEquations = Any[]

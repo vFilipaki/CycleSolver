@@ -1,3 +1,12 @@
+massEquations = Any[]
+MassCoef = Any[]
+MassEq1 = Any[]
+massParent = Any[]
+closedInteractions = Any[]
+fluidEq = Any[]
+m_fraction = Any[]
+m_Cycle = Any[]
+
 function MassFlow(inStt, outStt, isolate=false)
     push!(massParent, [inStt, outStt])
     if isolate
@@ -6,7 +15,7 @@ function MassFlow(inStt, outStt, isolate=false)
         end
     else
         for i in [inStt..., outStt...]
-            push!(fluidEq, [i, SystemCycles[end].isRefrigerationCycle, SystemCycles[end].fluid])
+            push!(fluidEq, [i, CycleSolver.SystemCycles[end].isRefrigerationCycle, CycleSolver.SystemCycles[end].fluid])
     end end
 
     m_total = :($(inStt[1]).m)
@@ -106,13 +115,11 @@ function FindRootState(MassCopy, cycleStatesSymbols)
     return RootStt
 end
 
-function SetupMass()
-    MassCopy = deepcopy(massParent)
+function divideStatesPerCycle(cycleStatesSymbols)
     for i in 1:length(massParent)
         massParent[i] = [massParent[i][1]..., massParent[i][2]...]        
     end
-
-    cycleStatesSymbols = Any[]
+    
     for i in massParent
         next = false
         for j in i
@@ -164,11 +171,9 @@ function SetupMass()
             push!(cycleStatesSymbols, Any[copy1..., copy2...])
         end
     end
+end
 
-    RootStt = FindRootState(MassCopy, cycleStatesSymbols)
-    
-    cDependencies = Vector{Any}()
-
+function FindCyclesInteractions(cDependencies, cycleStatesSymbols)
     for i in closedInteractions
         for j in 1:size(cycleStatesSymbols)[1]
             if i[1] in cycleStatesSymbols[j]
@@ -177,7 +182,9 @@ function SetupMass()
                         if !([j, k] in cDependencies) && !([k, j] in cDependencies)
                             push!(cDependencies, [j, k])                      
     end end end end end end
+end
 
+function EquationsHaveMassValues(cDependencies, cycleStatesSymbols)
     for i in unsolvedEquations
         if size(i.vars)[1] == 1 &&
         i.vars[1] isa Expr &&
@@ -189,9 +196,14 @@ function SetupMass()
                     for w in cDependencies
                         if k in w
                             SystemCycles[w[1]].massDefined = true
-                            SystemCycles[w[2]].massDefined = true                
+                            SystemCycles[w[2]].massDefined = true
     end end end end end end
+end
 
+function MainCycleMass(cycleStatesSymbols)
+    cDependencies = Vector{Any}()
+    FindCyclesInteractions(cDependencies, cycleStatesSymbols)
+    EquationsHaveMassValues(cDependencies, cycleStatesSymbols)
     for i in copy(fluidEq)
         if i[3] isa String
             eval(Expr(:(=), :($(i[1]).fluid), i[3]))
@@ -199,16 +211,18 @@ function SetupMass()
     end end
     
     for i in cDependencies
-        if true in [SystemCycles[j].massDefined for j in i] 
+        if true in [CycleSolver.SystemCycles[j].massDefined for j in i]
             for j in i
-                SystemCycles[j].massDefined = true            
+                CycleSolver.SystemCycles[j].massDefined = true   
     end end end
-        
+    return cDependencies
+end
+
+function GenearateMassEquations(cycleStatesSymbols, RootStt)
     CyclesMassIndex = Array{Any}(undef, size(cycleStatesSymbols)[1])
-    removeItem = []
     MassEq3 = []   
     for i in 1:size(RootStt)[1]
-        if SystemCycles[i].massDefined
+        if CycleSolver.SystemCycles[i].massDefined
             indexProp = size(m_Cycle)[1] + 1       
             CreateVariable(Expr(:ref, :m_Cycle, indexProp))
             CyclesMassIndex[i] = indexProp
@@ -233,9 +247,9 @@ function SetupMass()
                         push!(MassEq3, [:($(MassEq1[j][3][1]).m), equalityMass])    
                     end
                     MassEq1[j][1] = :($(MassEq1[j][1].args[1]) = $(equalityMass))           
-                    if SystemCycles[i].mainMassFlux != -1
-                        eval(Expr(:(=), equalityMass, SystemCycles[i].mainMassFlux))                            
-                        push!(MassEq3, [equalityMass, SystemCycles[i].mainMassFlux])                            
+                    if CycleSolver.SystemCycles[i].mainMassFlux != -1
+                        eval(Expr(:(=), equalityMass, CycleSolver.SystemCycles[i].mainMassFlux))                            
+                        push!(MassEq3, [equalityMass, CycleSolver.SystemCycles[i].mainMassFlux])                            
                     end
                 else
                     for j2 in outVars
@@ -246,7 +260,6 @@ function SetupMass()
                 end end end end
                 break
     end end end
-
     MassEq2 = Array{Any}(undef, size(MassEq1)[1])
     for i in 1:size(MassEq1)[1]
         MassEq2[i] = Any[MassEq1[i][1].args[1], MassEq1[i][1].args[2]]
@@ -274,80 +287,29 @@ function SetupMass()
         ret.priority = false
         push!(massEquations, ret)
     end
-    deletList = []
-    for i in 1:length(unsolvedEquations)
-        if (length(unsolvedEquations[i].vars) == 2 &&
-            unsolvedEquations[i].vars[1] isa Expr && (unsolvedEquations[i].vars[1].head == :.) && 
-            unsolvedEquations[i].vars[1].args[end] == QuoteNode(:mFraction) &&
-            unsolvedEquations[i].vars[2] isa Expr && (unsolvedEquations[i].vars[2].head == :.) && 
-            unsolvedEquations[i].vars[2].args[end] == QuoteNode(:mFraction))
+    return MassEq2
+end
 
-            inEquation = [-1, -1]
-            for k in 1:length(massEquations)
-                if (length(massEquations[k].vars) == 0) continue end
-                                    
-                if (massEquations[k].vars[1].args[1] == unsolvedEquations[i].vars[1].args[1])
-                    inEquation[1] = k
-                    if(inEquation[2] != -1) break end
-                end
-
-                if (massEquations[k].vars[1].args[1] == unsolvedEquations[i].vars[2].args[1])
-                    inEquation[2] = k
-                    if (inEquation[1] != -1) break end
-                end
-            end
-            newBsEq = false;
-            local ret
-            local eq
-            if (inEquation[1] != -1 && inEquation[2] == -1)
-                ret = MathEq()
-                eq = Expr(:call, :(~), 
-                    :($(unsolvedEquations[i].vars[2].args[1]).m),
-                    massEquations[inEquation[1]].Eq.rhs)                    
-                newBsEq = true;
-            elseif (inEquation[1] == -1 && inEquation[2] != -1)
-                ret = MathEq()
-                eq = Expr(:call, :(~), 
-                    :($(unsolvedEquations[i].vars[1].args[1]).m),
-                    massEquations[inEquation[2]].Eq.rhs)
-                newBsEq = true;                    
-            end
-            if (newBsEq)
-                eq = Symbolics.simplify(CrossMultiplication(eval(eq)); expand=true)
-                ret.Eq = eq
-                ret.vars = Any[]
-                ret.vars = GetEquationVariables(Meta.parse(string(eq.lhs)))
-                ret.priority = false
-                for k in 1:length(massEquations)
-                    if contains(string(massEquations[k].Eq), string(eq.lhs))     
-                        massEquations[k].Eq = substitute(massEquations[k].Eq, Dict([eval(ret.vars[1]) => ret.Eq.rhs]))
-                        massEquations[k].Eq = Symbolics.simplify(CrossMultiplication(eval(massEquations[k].Eq)); expand=true)  
-                    end
-                end
-
-                push!(massEquations, ret)
-                push!(deletList, i)                    
-            end
-        end
-    end 
-
-    for i in length(deletList):-1:1
-        deleteat!(unsolvedEquations, deletList[i])
-    end
+function SetupMass()
+    cycleStatesSymbols = Any[]
+    MassCopy = deepcopy(massParent)
+    divideStatesPerCycle(cycleStatesSymbols)
+    RootStt = FindRootState(MassCopy, cycleStatesSymbols)    
+    MainCycleMass(cycleStatesSymbols)
+    GenearateMassEquations(cycleStatesSymbols, RootStt)
     
-    for i in 1:length(unsolvedEquations)
-        SubstituteMassInEq(unsolvedEquations[i])
-    end
     for i in 1:length(SystemCycles)
         SystemCycles[i].states = [eval(j) for j in cycleStatesSymbols[i]]
         for j in cycleStatesSymbols[i]
             eval(Expr(:(=), :($(j).Cycle), SystemCycles[i]))
         end
     end
+    for i in 1:length(unsolvedEquations)
+        SubstituteMassInEq(unsolvedEquations[i])
+    end
     for i in fluidEq
         eval(Expr(:(=), :($(i[1]).fluid), eval(i[3])))
     end
-    
     for i in massEquations
         if length(i.vars) > 0
             massTemp = Meta.parse(string(i.Eq.rhs))
@@ -372,18 +334,30 @@ function SubstituteMassInEq(Equation)
                 newProp = Expr(:ref, newProp.args... , 8)
             end
             for k in massEquations
-                if length(k.vars) > 0 && k.vars[1].args[1] == j.args[1]
-                    
-                    Eq2Expr = Meta.parse(string(Equation.Eq))                                    
-                    Eq2Expr = ExpressionSubstitution(Eq2Expr, newProp, Meta.parse(string(k.Eq.rhs)))
-                    
+                if length(k.vars) > 0 && k.vars[1].args[1] == j.args[1]                    
+                    Eq2Expr = Meta.parse(string(Equation.Eq))
+                    newValue = string(k.Eq.rhs)
+                    newValue = replace(newValue, "Vars" => "")
+
+                    cycleMass = filter(x -> eval(j.args[1]) in x.states, SystemCycles)[1].mainMassFlux
+                    if (cycleMass == -1)
+                        indexSt = findfirst("m_Cycle[", newValue)[1]
+                        indexEnd = indexSt - 1 + findfirst("]", newValue[indexSt:end])[1]
+                        newValue = replace(newValue, newValue[indexSt:indexEnd] => "1")
+                    else
+                        newValue = string("(", newValue, ")/", cycleMass)
+                    end
+
+                    Eq2Expr = ExpressionSubstitution(Eq2Expr, newProp, Meta.parse(newValue))
                     Equation.vars = GetEquationVariables(copy(Eq2Expr))
-                    if (contains(string(Eq2Expr), "Stts[8]"))
+                    
+                    if (contains(string(Eq2Expr), "Stts[8]"))                        
                         Eq2Expr = Meta.parse(replace(string(Eq2Expr), "Stts[8]" => ".mFraction"))
-                    end                          
+                    end
+                    eval(Eq2Expr)             
                     Equation.Eq = CrossMultiplication(eval(Eq2Expr))
                     for j2 in Equation.vars
-                        if j2 isa Expr && j2.args[1] == :m_Cycle
+                        if j2 isa Expr && j2.args[1] == :m_Cycle                            
                             Equation.Eq = substitute(Equation.Eq, Dict([eval(j2) => 1]))
                             Equation.vars = GetEquationVariables(Meta.parse(string(Equation.Eq)))
                             break
@@ -448,4 +422,15 @@ function SubstituteMassInEq(Equation)
                 end  
         end end           
     end
+end
+
+function clearMassVariables()
+    global massEquations = Any[]
+    global MassCoef = Any[]
+    global MassEq1 = Any[]
+    global massParent = Any[]
+    global closedInteractions = Any[]
+    global fluidEq = Any[]
+    global m_fraction = Any[]
+    global m_Cycle = Any[]
 end
