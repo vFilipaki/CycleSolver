@@ -10,17 +10,21 @@ function EnergyBalance(inStt, outStt)
     NewEquation(Expr(:(=), inEq, outEq))
 end
 
+
+function GetStatesSymbols(inStt, outStt)
+    return [
+        Any[i.name for i in inStt],
+        Any[i.name for i in outStt]
+    ]
+end
+
 function pump(inStt, outStt, n = 100)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
-    
+    inStt, outStt = GetStatesSymbols(inStt, outStt)    
     if length(inStt) != length(outStt)
-        # SET ERROR
+        throw(DomainError("The number of input and output states must be equal in the pump."))
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            pump([inStt[i]], [outStt[i]], n)
+            pump([eval(inStt[i])], [eval(outStt[i])], n)
         end
         return
     else
@@ -59,10 +63,7 @@ function pump(inStt, outStt, n = 100)
 end
 
 function turbine(inStt, outStt, n = 100)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt)
         if length(inStt) == 1 && 1 < length(outStt)
             Wouttemp = :($(inStt[1]).m * $(inStt[1]).h)
@@ -111,7 +112,7 @@ function turbine(inStt, outStt, n = 100)
         end
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            turbine(Any[inStt[i]], Any[outStt[i]], n)
+            turbine(Any[eval(inStt[i])], Any[eval(outStt[i])], n)
         end
         return
     else
@@ -142,13 +143,9 @@ function turbine(inStt, outStt, n = 100)
 end
     
 function condenser(inStt, outStt)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt)
         MassFlow(inStt, outStt)
-        # EnergyBalance(inStt, outStt)
         states = [inStt..., outStt...]
         for i in 1:(length(states) - 1)
             NewEquation(:($(states[i]).p = $(states[i + 1]).p))
@@ -174,7 +171,7 @@ function condenser(inStt, outStt)
         return
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            condenser([inStt[i]], [outStt[i]])
+            condenser([eval(inStt[i])], [eval(outStt[i])])
         end
         return
     else
@@ -195,15 +192,12 @@ function condenser(inStt, outStt)
 end
 
 function boiler(inStt, outStt)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt)
-        # println("ERROR")
+        throw(DomainError("The number of input and output states must be equal in the boiler."))
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            boiler([inStt[i]], [outStt[i]])
+            boiler([eval(inStt[i])], [eval(outStt[i])])
         end
         return
     else
@@ -223,15 +217,12 @@ function boiler(inStt, outStt)
 end
 
 function evaporator(inStt, outStt)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt)
-        # println("ERROR")
+        throw(DomainError("The number of input and output states must be equal in the evaporator."))
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            evaporator([inStt[i]], [outStt[i]])
+            evaporator([eval(inStt[i])], [eval(outStt[i])])
         end
         return
     else
@@ -252,9 +243,9 @@ function evaporator(inStt, outStt)
 end
 
 function evaporator_condenser(inStt, outStt)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
+    if length(inStt) != length(outStt) || length(inStt) != 2
+        throw(DomainError("The number of input and output states must be equal to 2 in the evaporator_condenser."))
     end
     EnergyBalance(inStt, outStt)
     push!(closedInteractions, inStt)
@@ -272,15 +263,12 @@ function evaporator_condenser(inStt, outStt)
 end
 
 function expansion_valve(inStt, outStt)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt)
-        # println("ERROR")
+        throw(DomainError("The number of input and output states must be equal in the expansion_valve."))
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            expansion_valve([inStt[i]], [outStt[i]])
+            expansion_valve([eval(inStt[i])], [eval(outStt[i])])
         end
         return
     else
@@ -292,15 +280,12 @@ function expansion_valve(inStt, outStt)
 end
 
 function flash_chamber(inStt, outStt)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt)
-        # println("ERROR")
+        throw(DomainError("The number of input and output states must be equal in the flash_chamber."))
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            flash_chamber([inStt[i]], [outStt[i]])
+            flash_chamber([eval(inStt[i])], [eval(outStt[i])])
         end
         return
     else
@@ -312,8 +297,10 @@ function flash_chamber(inStt, outStt)
 end
 
 function heater_closed(inStt, outStt)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
+    if length(inStt) != length(outStt) || length(inStt) != 2
+        throw(DomainError("The number of input and output states must be equal to 2 in the heater_closed."))
+    end
     EnergyBalance(inStt, outStt)
     push!(closedInteractions, inStt)
     for i in 1:length(inStt)
@@ -333,8 +320,10 @@ function heater_closed(inStt, outStt)
 end end
 
 function heater_open(inStt, outStt)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
+    if length(outStt) != 1
+        throw(DomainError("The number of output states must be equal to 1 in the heater_open."))
+    end
     MassFlow(inStt, outStt)
     EnergyBalance(inStt, outStt)
     states = [inStt..., outStt...]
@@ -348,8 +337,7 @@ function heater_open(inStt, outStt)
 end
 
 function mix(inStt, outStt)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     MassFlow(inStt, outStt)
     EnergyBalance(inStt, outStt)
     states = [inStt..., outStt...]
@@ -361,8 +349,10 @@ function mix(inStt, outStt)
 end end
 
 function div(inStt, outStt)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    if length(inStt) != 1
+        throw(DomainError("The number of input states must be equal to 1 in the div."))
+    end
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     MassFlow(inStt, outStt)
     states = [inStt..., outStt...]
     for i in 1:(length(states) - 1)
@@ -375,8 +365,7 @@ function div(inStt, outStt)
 end end
 
 function process_heater(inStt, outStt)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     MassFlow(inStt, outStt)
     states = [inStt..., outStt...]
     for i in 1:(length(states) - 1)
@@ -387,23 +376,12 @@ function process_heater(inStt, outStt)
 end end
 
 function compressor(inStt, outStt, n = 100)
-    if inStt[1] isa Stt
-        inStt = Any[i.name for i in inStt]
-        outStt = Any[i.name for i in outStt]
-    end
-
-    push!(PropsEquations, Any[:Win, 
-    :($(outStt[1]).m * $(outStt[1]).h - $(inStt[1]).m * $(inStt[1]).h),
-    [string("compressor: ", string(inStt[1]), " >> ", string(outStt[1])), (inStt[1])]])
-    push!(PropsEquations, Any[:win, 
-    :($(outStt[1]).h - $(inStt[1]).h),
-    [string("compressor: ", string(inStt[1]), " >> ", string(outStt[1])), (inStt[1])]]) 
-
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt)
-        # println("ERROR")
+        throw(DomainError("The number of input and output states must be equal in the compressor."))
     elseif length(inStt) > 1
         for i in 1:length(inStt)
-            compressor([inStt[i]], [outStt[i]], n)
+            compressor([eval(inStt[i])], [eval(outStt[i])], n)
         end
         return
     else
@@ -411,6 +389,13 @@ function compressor(inStt, outStt, n = 100)
         inStt = inStt[1]
         outStt = outStt[1]
     end
+
+    push!(PropsEquations, Any[:Win, 
+    :($outStt.m * $outStt.h - $inStt.m * $inStt.h),
+    [string("compressor: ", string(inStt), " >> ", string(outStt)), inStt]])
+    push!(PropsEquations, Any[:win, 
+    :($outStt.h - $inStt.h),
+    [string("compressor: ", string(inStt), " >> ", string(outStt)), inStt]])  
 
     if n == :find
         push!(findVariables, Any[:(($inStt.h - SttTemp_S)/($inStt.h - $outStt.h)),
@@ -433,8 +418,10 @@ function compressor(inStt, outStt, n = 100)
 end
 
 function combustion_chamber(inStt, outStt)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
+    if length(inStt) != 1 || length(outStt) != 1
+        throw(DomainError("The number of input and output states must be equal to 1 in the combustion_chamber."))
+    end
     MassFlow(inStt, outStt)
     inStt = inStt[1]
     outStt = outStt[1]
@@ -447,8 +434,10 @@ function combustion_chamber(inStt, outStt)
 end
 
 function heater_exchanger(inStt, outStt, effect = nothing)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
+    if length(inStt) != length(outStt) || length(inStt) != 2
+        throw(DomainError("The number of input and output states must be equal to 2 in the heater_exchanger."))
+    end
     push!(closedInteractions, inStt)
     for i in 1:length(inStt)
         MassFlow([inStt[i]], [outStt[i]], true)
@@ -514,8 +503,10 @@ function heater_exchanger(inStt, outStt, effect = nothing)
 end
 
 function separator(inStt, outStt)
-    inStt = Any[i.name for i in inStt]
-    outStt = Any[i.name for i in outStt]
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
+    if length(outStt) != 2 || length(inStt) != 1
+        throw(DomainError("The number of input states must be equal to 1, and the output states must be equal to 2 in the separator."))
+    end
     MassFlow(inStt, outStt)
     states = [inStt..., outStt...]
     for i in 1:(length(states) - 1)
@@ -523,9 +514,6 @@ function separator(inStt, outStt)
     end
     if length(states) > 2
         NewEquation(:($(states[end]).p = $(states[1]).p))
-    end
-    if length(outStt) != 2
-        # println("ERROR")
     end
     NewEquation(:($(outStt[1]).Q = 1))
     NewEquation(:($(outStt[2]).Q = 0))
