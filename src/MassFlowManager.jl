@@ -6,6 +6,7 @@ closedInteractions = Any[]
 fluidEq = Any[]
 m_fraction = Any[]
 m_Cycle = Any[]
+stAux = Any[]
 
 function MassFlow(inStt, outStt, isolate=false)
     push!(massParent, [inStt, outStt])
@@ -424,6 +425,34 @@ function SubstituteMassInEq(Equation)
     end
 end
 
+function EvaluateStatesMassFlux()
+    for i in massEquations
+        if length(i.vars) > 0
+            massTemp = Meta.parse(string(i.Eq.rhs))
+            massTemp = ExpressionSubstitution(massTemp, :m_fractionVars, :m_fraction)
+            massTemp = ExpressionSubstitution(massTemp, :m_CycleVars, :m_Cycle)
+            eval(Expr(:(=), i.vars[1], eval(massTemp)))
+    end end
+end
+
+function EvaluateStatesMassFluxFraction()
+    for j in 1:length(SystemCycles)
+        if SystemCycles[j].massDefined
+            systemMass = 0
+            for k in SystemCycles[j].states
+                if eval(Expr(:., k, :(:m))) > systemMass                        
+                    systemMass = eval(Expr(:., k, :(:m)))
+            end end
+            for k in SystemCycles[j].states
+                eval(Expr(:(=), Expr(:., k, :(:mFraction)), eval(Expr(:., k, :(:m))) / systemMass))
+            end
+        else
+            for k in SystemCycles[j].states
+                eval(Expr(:(=), Expr(:., k, :(:mFraction)), eval(Expr(:., k, :(:m)))))
+                eval(Expr(:(=), Expr(:., k, :(:m)), nothing))
+    end end end
+end
+
 function clearMassVariables()
     global massEquations = Any[]
     global MassCoef = Any[]
@@ -433,4 +462,5 @@ function clearMassVariables()
     global fluidEq = Any[]
     global m_fraction = Any[]
     global m_Cycle = Any[]
+    global stAux = Any[]
 end

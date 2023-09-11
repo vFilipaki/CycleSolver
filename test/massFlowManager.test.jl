@@ -295,3 +295,54 @@ end
     @test string(CycleSolver.unsolvedEquations[3].Eq) ==
     "st2Stts[3] ~ st3Stts[3]*m_fractionVars[1, 1]"
 end
+
+@testset "massFlowManager.test.jl: Mass flux evaluation" begin
+    CycleSolver.ClearSystem()
+    
+    push!(CycleSolver.SystemCycles, CycleSolver.CycleStruct())
+    CycleSolver.SystemCycles[end].isRefrigerationCycle = false
+    CycleSolver.SystemCycles[end].massDefined = false;
+    CycleSolver.SystemCycles[end].fluid = "Water"
+    CycleSolver.SystemCycles[end].mainMassFlux = -1
+    CycleSolver.MassFlow([:st1], [:st2])
+    CycleSolver.MassFlow([:st2], [:st3, :st4])
+    CycleSolver.MassFlow([:st4], [:st5])
+    CycleSolver.MassFlow([:st3, :st5], [:st6])
+    CycleSolver.MassFlow([:st6], [:st1])
+    for i in CycleSolver.massParent
+        for j in [i[1]..., i[2]...]
+            CycleSolver.createState(j)
+    end end
+    CycleSolver.NewEquation(:(st2.m = 5))
+    CycleSolver.NewEquation(:(st4.mFraction = 0.3))
+    CycleSolver.SetupMass()
+    CycleSolver.EquationsSolver(CycleSolver.unsolvedEquations)
+
+    CycleSolver.EvaluateStatesMassFlux()
+    expectedResults = [
+        5.0, 5.0, 3.5, 1.5, 1.5, 5.0
+    ]
+    for i in 1:length(CycleSolver.SystemCycles[1].states)
+        @test CycleSolver.SystemCycles[1].states[i].m ==
+        expectedResults[i]
+    end
+
+    expectedResults = [
+        "st1Stts[8]", "st2Stts[8]", "st3Stts[8]",
+        "st4Stts[8]", "st5Stts[8]", "st6Stts[8]",
+    ]
+    for i in 1:length(CycleSolver.SystemCycles[1].states)
+        @test string(CycleSolver.SystemCycles[1].states[i].mFraction) ==
+        expectedResults[i]
+    end
+
+    CycleSolver.EvaluateStatesMassFluxFraction()
+
+    expectedResults = [
+        1.0, 1.0, 0.7, 0.3, 0.3, 1.0
+    ]
+    for i in 1:length(CycleSolver.SystemCycles[1].states)
+        @test CycleSolver.SystemCycles[1].states[i].mFraction ==
+        expectedResults[i]
+    end
+end
