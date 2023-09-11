@@ -256,8 +256,6 @@ function evaporator_condenser(inStt, outStt)
     NewEquation(:($(outStt[1]).Q = 1))
     NewEquation(:($(outStt[2]).Q = 0))
 
-    push!(Qflex, Any[inStt, outStt,
-    string("evaporator_condenser: ", string(inStt), " >> ", string(outStt))])
     push!(qflex, Any[inStt, outStt,
     string("evaporator_condenser: ", string(inStt), " >> ", string(outStt))])
 end
@@ -427,8 +425,6 @@ function combustion_chamber(inStt, outStt)
     outStt = outStt[1]
     NewEquation(:($outStt.p = $inStt.p))
 
-    push!(Qflex, Any[[inStt], [outStt],
-    string("combustion_chamber: ", string(inStt), " >> ", string(outStt))])
     push!(qflex, Any[[inStt], [outStt],
     string("combustion_chamber: ", string(inStt), " >> ", string(outStt))])     
 end
@@ -444,8 +440,6 @@ function heater_exchanger(inStt, outStt, effect = nothing)
         NewEquation(:($(outStt[i]).p = $(inStt[i]).p))
     end
     
-    push!(Qflex, Any[inStt, outStt,
-    string("heater_exchanger: ", string(inStt), " >> ", string(outStt))])
     push!(qflex, Any[inStt, outStt,
     string("heater_exchanger: ", string(inStt), " >> ", string(outStt))]) 
 
