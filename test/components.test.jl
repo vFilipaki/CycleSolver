@@ -270,7 +270,7 @@ end
         end
     end
 
-    @test string(CycleSolver.Qflex[1][1],", ",CycleSolver.Qflex[1][2]) == 
+    @test string(CycleSolver.qflex[1][1],", ",CycleSolver.qflex[1][2]) == 
     "Any[:st1, :sta], Any[:st2, :stb]"
 end
 
@@ -532,7 +532,7 @@ end
         end
     end
 
-    @test string(CycleSolver.Qflex[1][1],", ",CycleSolver.Qflex[1][2]) == 
+    @test string(CycleSolver.qflex[1][1],", ",CycleSolver.qflex[1][2]) == 
     "[:st1], [:st2]"
 end
 
@@ -574,8 +574,8 @@ end
             "Any[:st8, :st9], Any[:st10, :st11]",
             "Any[:st12, :st13], Any[:st14, :st15]"
         ]
-        for i in 1:length(CycleSolver.Qflex)
-            @test string(CycleSolver.Qflex[i][1],", ",CycleSolver.Qflex[i][2]) ==
+        for i in 1:length(CycleSolver.qflex)
+            @test string(CycleSolver.qflex[i][1],", ",CycleSolver.qflex[i][2]) ==
             expectedResults[i]
         end
     end
