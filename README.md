@@ -3,6 +3,7 @@
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://vfilipaki.github.io/CycleSolver.jl/stable/)
 [![codecov](https://codecov.io/gh/vFilipaki/CycleSolver.jl/graph/badge.svg?token=XA1IQOY99S)](https://codecov.io/gh/vFilipaki/CycleSolver.jl)
 [![version](https://juliahub.com/docs/General/CycleSolver/stable/version.svg)](https://juliahub.com/ui/Packages/General/CycleSolver)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ![CycleSolver](https://github.com/vFilipaki/CycleSolver.jl/blob/main/docs/src/assets/logo.png?raw=true)
 
