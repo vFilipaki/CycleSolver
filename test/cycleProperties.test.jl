@@ -1,6 +1,8 @@
 using Test, CycleSolver
 
 @testset "cycleProperties.test.jl: Get index of Cycle by state symbol" begin
+    CycleSolver.ClearSystem()
+    
     push!(CycleSolver.SystemCycles, CycleSolver.CycleStruct())
     CycleSolver.createState(:st1)
     CycleSolver.createState(:st2)
