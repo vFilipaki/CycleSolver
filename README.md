@@ -1,6 +1,6 @@
 # CycleSolver
 [![Build Status](https://github.com/vFilipaki/CycleSolver.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/vFilipaki/CycleSolver.jl/actions/workflows/CI.yml?query=branch%3Amaster)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://vfilipaki.github.io/CycleSolver.jl/dev/)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://vfilipaki.github.io/CycleSolver.jl/stable/)
 [![codecov](https://codecov.io/gh/vFilipaki/CycleSolver.jl/graph/badge.svg?token=XA1IQOY99S)](https://codecov.io/gh/vFilipaki/CycleSolver.jl)
 
 ![CycleSolver](https://github.com/vFilipaki/CycleSolver.jl/blob/main/docs/src/assets/logo.png?raw=true)
