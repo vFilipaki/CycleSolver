@@ -1,4 +1,3 @@
-<br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="https://github.com/vFilipaki/CycleSolver.jl/blob/main/docs/src/assets/logo.png?raw=true" alt="Logo" width="200" height="200">
@@ -13,11 +12,20 @@
     <a href="https://juliahub.com/ui/Packages/General/CycleSolver"><img src="https://juliahub.com/docs/General/CycleSolver/stable/version.svg"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
     <br />
+    <br />
     Package for solving thermodynamic cycles in steady state 
     <br />
     <a href="https://vfilipaki.github.io/CycleSolver.jl/stable/"><strong>Explore the docs »</strong></a>
     <br />
+    <br />
+    <a href="">How to install</a>
+    ·
+    <a href="">How to cite this project</a>
+    ·
+    <a href="">See examples</a>
 </div>
+
+---
 
 The `CycleSolver.jl` package uses metaprogramming to provide a unique formatting structure for representing cycles and supplying already known properties. Based on this, the algorithm seeks to automatically discover other unknown properties of the system.
 
