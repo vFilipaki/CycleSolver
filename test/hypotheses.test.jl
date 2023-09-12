@@ -1,6 +1,7 @@
 using Test, CycleSolver
 
 @testset "hypotheses.test.jl: Check point" begin
+    CycleSolver.ClearSystem()
 
     CycleSolver.NewEquation(:(a = 50))
     CycleSolver.NewEquation(:(b = 150))
@@ -19,7 +20,8 @@ using Test, CycleSolver
 end
 
 @testset "hypotheses.test.jl: Solver with hypotheses" begin
-
+    CycleSolver.ClearSystem()
+    
     CycleSolver.NewEquation(:(st2.h = st1.h - (st1.h - st2s.h) * 0.8))
     CycleSolver.NewEquation(:(st1.T = 500))
     CycleSolver.NewEquation(:(st1.p = 100))    
