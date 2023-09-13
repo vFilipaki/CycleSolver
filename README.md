@@ -31,6 +31,19 @@ The `CycleSolver.jl` package uses metaprogramming to provide a unique formatting
 
 In addition to cycle solving, the presented package also offers result visualization features, generating tables and graphs to clearly illustrate cycle properties. This way, the tool allows for a quick and reliable analysis of thermodynamic cycles.
 
+## Installation
+To install `CycleSolver.jl`, use the Julia package manager. In Julia REPL, type `]` to enter Pkg REPL mode and run:
+
+```julia
+pkg> add CycleSolver
+```
+Or, you can install via the Pkg API:
+```julia
+julia> using Pkg
+
+julia> Pkg.add("CycleSolver")
+```
+
 ## Documentation
 
 For information on how to use the package, see the [documentation](https://vfilipaki.github.io/CycleSolver.jl/dev/).
