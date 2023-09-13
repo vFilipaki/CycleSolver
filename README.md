@@ -3,7 +3,7 @@
     <img src="https://github.com/vFilipaki/CycleSolver.jl/blob/main/docs/src/assets/logo.png?raw=true" alt="Logo" width="200" height="200">
   </a>
 
-  <h1 align="center">CycleSolver.jl</h1>
+  <h1 align="center">CycleSolver</h1>
 
   <p align="center">
     <a href="https://github.com/vFilipaki/CycleSolver.jl/actions/workflows/CI.yml?query=branch%3Amaster"><img src="https://github.com/vFilipaki/CycleSolver.jl/actions/workflows/CI.yml/badge.svg?branch=main"></a>
