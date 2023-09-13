@@ -18,11 +18,11 @@
     <a href="https://vfilipaki.github.io/CycleSolver.jl/stable/"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="">How to install</a>
+    <a href="https://github.com/vFilipaki/CycleSolver.jl#installation">How to install</a>
     ·
-    <a href="">How to cite this project</a>
+    <a href="https://github.com/vFilipaki/CycleSolver.jl#citations">How to cite this project</a>
     ·
-    <a href="">See examples</a>
+    <a href="https://vfilipaki.github.io/CycleSolver.jl/dev/example1/">See examples</a>
 </div>
 
 ---
