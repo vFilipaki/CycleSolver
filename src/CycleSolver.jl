@@ -57,4 +57,6 @@ module CycleSolver
 
         EvaluateFindVariables()
     end
+
+    export PrintResults, @solve
 end
