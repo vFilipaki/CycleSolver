@@ -38,12 +38,14 @@ To install `CycleSolver.jl`, use the Julia package manager. In Julia REPL, type 
 ```julia
 pkg> add CycleSolver
 ```
-Or, you can install via the Pkg API:
+Alternatively, you can install it via the Pkg API:
 ```julia
 julia> using Pkg
 
 julia> Pkg.add("CycleSolver")
 ```
+Additionally, you have the option to use the `CycleSolver.jl` package online environment, without the need for any local software installation. You can access it through the following link:
+ * [CycleSolver Online](https://mybinder.org/v2/gh/vFilipaki/CycleSolver.jl/v0.2.0)
 
 ## Documentation
 
