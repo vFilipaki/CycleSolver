@@ -1,7 +1,7 @@
 using PrettyTables
 using Plots
 
-function TSGraph(cycles)
+function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
     p = plot()
     for c in cycles
         flow = [[i[3], i[2]] for i in MassEq1]
@@ -22,17 +22,18 @@ function TSGraph(cycles)
         push!(s, s[1])
         push!(name, "")
 
-        for i in 1:length(t)-1
-            if name[i] == ""
-                continue
-            end
-            for j in i+1:length(t)
-                if (t[j]-t[i])^2+(100*(s[j]-s[i]))^2 < 50
-                    t[i] = (t[i] + t[j])/2
-                    s[i] = (s[i] + s[j])/2
-                    name[i] = string(name[i], " ", name[j])
-                    name[j] = ""
-        end end end
+        if showStateNames
+            for i in 1:length(t)-1
+                if name[i] == ""
+                    continue
+                end
+                for j in i+1:length(t)
+                    if (t[j]-t[i])^2+(100*(s[j]-s[i]))^2 < 50
+                        t[i] = (t[i] + t[j])/2
+                        s[i] = (s[i] + s[j])/2
+                        name[i] = string(name[i], " ", name[j])
+                        name[j] = ""
+        end end end end
 
         colors = [RGBA{Float64}(0, 0, 0, 0.4), RGBA{Float64}(0, 0, 1, 1)]
         txtColor = RGBA{Float64}(0, 0, 0, 1)
@@ -49,12 +50,13 @@ function TSGraph(cycles)
             txtColor = colors[2]
         end        
         
-        for j in 1:length(name)
-            if name[j] != ""
-                annotate!(s[j], t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
-                annotate!(s[j], t[j], text(name[j], txtColor, :center, :center, 8))
-            end
-        end
+        if showStateNames
+            for j in 1:length(name)
+                if name[j] != ""
+                    annotate!(s[j], t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
+                    annotate!(s[j], t[j], text(name[j], txtColor, :center, :center, 8))
+        end end end
+        
         fluidTemp = SystemCycles[c].states[1].fluid
 
         AlltRange = Any[SystemCycles[c].states[1].T, SystemCycles[c].states[1].T]
@@ -73,7 +75,8 @@ function TSGraph(cycles)
         end
         sizeRangeT = AlltRange[2] - AlltRange[1]
 
-        if !isVapor
+        if !isVapor && 
+            !(length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined)
             res = 15
             tvec = Array{Any}(nothing, 2*res+1)
             svec = Array{Any}(nothing, 2*res+1)
@@ -166,101 +169,119 @@ function TSGraph(cycles)
                 push!(t, localSt2.T)
                 push!(s, localSt2.s)
             end
-        
-            plot!(s, t, color = colors[2])
-        end            
-        plot!(legend = false, grid = false,
-        xlabel = "s [kJ/kg.K]", ylabel = "T [K]")
-       
-        if length(cycles) == 1
-            pressureRanges = Any[]
-            for i in SystemCycles[c].states
-                if !(i.p in pressureRanges)
-                    push!(pressureRanges, i.p)
+            
+            if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined
+                MainMass = 0
+                for i in SystemCycles[c].states
+                    if i.m > MainMass 
+                        MainMass = i.m                    
+                end end
+
+                for i in 1:length(s)
+                    s[i] *= MainMass
                 end
             end
 
-            for k in pressureRanges
-                tRange = Any[-1, -1]
+            plot!(s, t, color = colors[2])
+        end
+
+        if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined
+            plot!(legend = false, grid = false,
+            xlabel = "[kJ/K]", ylabel = "T [K]")
+        else
+            plot!(legend = false, grid = false,
+            xlabel = "s [kJ/kg.K]", ylabel = "T [K]")
+       
+            if length(cycles) == 1
+                pressureRanges = Any[]
                 for i in SystemCycles[c].states
-                    if i.p == k
-                        if tRange[1] == -1
-                            tRange = Any[i.T, i.T]
+                    if !(i.p in pressureRanges)
+                        push!(pressureRanges, i.p)
+                    end
+                end
+
+                for k in pressureRanges
+                    tRange = Any[-1, -1]
+                    for i in SystemCycles[c].states
+                        if i.p == k
+                            if tRange[1] == -1
+                                tRange = Any[i.T, i.T]
+                                continue
+                            end
+                        else
                             continue
                         end
+                        if i.T > tRange[2]
+                            tRange[2] = i.T
+                        end
+                        if i.T < tRange[1]
+                            tRange[1] = i.T
+                        end
+                    end
+
+                    tRange[2] += sizeRangeT * 0.35
+                    tRange[1] -= sizeRangeT * 0.1
+                    if PropsSI("Tmax", fluidTemp) < tRange[2] 
+                        tRange[2] = PropsSI("Tmax", fluidTemp)
+                    end
+
+                    if !isVapor 
+                        tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
                     else
-                        continue
-                    end
-                    if i.T > tRange[2]
-                        tRange[2] = i.T
-                    end
-                    if i.T < tRange[1]
-                        tRange[1] = i.T
-                    end
-                end
-
-                tRange[2] += sizeRangeT * 0.35
-                tRange[1] -= sizeRangeT * 0.1
-                if PropsSI("Tmax", fluidTemp) < tRange[2] 
-                    tRange[2] = PropsSI("Tmax", fluidTemp)
-                end
-
-                if !isVapor 
-                    tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
-                else
-                    try
-                        if tRange[1] < PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
-                            tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
-                        end
-                    catch
-                        tRange[1] += sizeRangeT * 0.1
-                    end
-                end
-
-                t = Any[]
-                s = Any[]
-                if abs(tRange[1] - tRange[2]) < 0.5
-                    push!(t, tRange[2].T)
-                    push!(s, tRange[2].s) 
-                else
-                    local tQ0
-                    try
-                        tQ0 = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
-                    catch
-                        tQ0 = -1
-                    end
-                    steps = ceil(Int, abs(tRange[2]-tRange[1]) / 10)
-                    signQ0 = tRange[1] > tQ0
-                    j = 0
-                    while j < steps
-                        j += 1
-                        tTemp = tRange[1] + j/steps * (tRange[2]-tRange[1])
-                        if (tTemp > tQ0) != signQ0
-                            push!(s, PropsSI("S", "P", k * 1000, "Q", tRange[2] < tRange[1] ? 1 : 0, fluidTemp)/1000)
-                            push!(t, tQ0)
-
-                            push!(s, PropsSI("S", "P", k * 1000, "Q", tRange[2] < tRange[1] ? 0 : 1, fluidTemp)/1000)
-                            push!(t, tQ0)
-                        end
-                        signQ0 = tTemp > tQ0
-                        if abs(tTemp - tQ0) > 0.5
-                            push!(s, PropsSI("S", "P", k * 1000, "T", tTemp, fluidTemp)/1000)
-                            push!(t, tTemp)
+                        try
+                            if tRange[1] < PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+                                tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+                            end
+                        catch
+                            tRange[1] += sizeRangeT * 0.1
                         end
                     end
-                end                
-                newC = RGBA{Float64}(colors[2].r, colors[2].g, colors[2].b, 0.4)
-                plot!(s, t, lw=1, color = newC)
-                txtP = string(round(Int, k), " KPa")
-                # annotate!(s[end], t[end], text("█"^(length(txtP)÷2+1), :white, :center, :center, 6, rotation = 45))
-                # annotate!(s[end], t[end], text(txtP, txtColor, :center, :center, 5, rotation = 45))
-            end            
+
+                    t = Any[]
+                    s = Any[]
+                    if abs(tRange[1] - tRange[2]) < 0.5
+                        push!(t, tRange[2].T)
+                        push!(s, tRange[2].s) 
+                    else
+                        local tQ0
+                        try
+                            tQ0 = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+                        catch
+                            tQ0 = -1
+                        end
+                        steps = ceil(Int, abs(tRange[2]-tRange[1]) / 10)
+                        signQ0 = tRange[1] > tQ0
+                        j = 0
+                        while j < steps
+                            j += 1
+                            tTemp = tRange[1] + j/steps * (tRange[2]-tRange[1])
+                            if (tTemp > tQ0) != signQ0
+                                push!(s, PropsSI("S", "P", k * 1000, "Q", tRange[2] < tRange[1] ? 1 : 0, fluidTemp)/1000)
+                                push!(t, tQ0)
+
+                                push!(s, PropsSI("S", "P", k * 1000, "Q", tRange[2] < tRange[1] ? 0 : 1, fluidTemp)/1000)
+                                push!(t, tQ0)
+                            end
+                            signQ0 = tTemp > tQ0
+                            if abs(tTemp - tQ0) > 0.5
+                                push!(s, PropsSI("S", "P", k * 1000, "T", tTemp, fluidTemp)/1000)
+                                push!(t, tTemp)
+                            end
+                        end
+                    end                
+                    newC = RGBA{Float64}(colors[2].r, colors[2].g, colors[2].b, 0.4)
+                    plot!(s, t, lw=1, color = newC)
+                    txtP = string(round(Int, k), " KPa")
+                    # annotate!(s[end], t[end], text("█"^(length(txtP)÷2+1), :white, :center, :center, 6, rotation = 45))
+                    # annotate!(s[end], t[end], text(txtP, txtColor, :center, :center, 5, rotation = 45))
+                end            
+            end
         end
     end
     return p
 end
 
-function PrintResults()
+function PrintResults(showStateNames=true, multiplyEntropyByMass=false)
     str = Any[]
     for i in 1:length(SystemCycles)
         TitleTxt = string(i,"- ")
@@ -364,7 +385,7 @@ function PrintResults()
         end
 
         #####################################################
-        plotHTML = sprint(show, "text/html", TSGraph([i]))
+        plotHTML = sprint(show, "text/html", TSGraph([i], showStateNames, multiplyEntropyByMass))
 
         #####################################################
 
@@ -434,7 +455,7 @@ function PrintResults()
             effTxt, round(System.n, digits=4), effTxt2, "</h2>")   
         end
 
-        plotHTML = sprint(show, "text/html", TSGraph(collect(1:length(SystemCycles))))
+        plotHTML = sprint(show, "text/html", TSGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass))
 
         perCycle = string(perCycle, 
                     "<div style=\"display: inline-block; padding: 15px; margin: 20px;",
