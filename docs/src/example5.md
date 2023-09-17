@@ -12,7 +12,9 @@
 
 !!! compat "Input code"
     ```julia
-    CycleSolver.@solve begin
+    using CycleSolver
+    
+    @solve begin
         st1.p = 300
         st2.p = 1500
         newRefrigerationCycle[R134a]
@@ -22,7 +24,7 @@
             evaporator(st4, st1)
     end
 
-    CycleSolver.PrintResults()
+    PrintResults()
     ```
 #### Output:
 

@@ -14,7 +14,9 @@
 
 !!! compat "Input code"
     ```julia
-    CycleSolver.@solve begin
+    using CycleSolver
+    
+    @solve begin
             st2.p / st1.p = 7
             st1.T = 20 + 273
             st1.p = 100
@@ -26,7 +28,7 @@
                 combustion_chamber(st4, st1)
     end
 
-    CycleSolver.PrintResults()
+    PrintResults()
     ```
 
 #### Output:

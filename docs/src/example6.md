@@ -13,7 +13,9 @@
 
 !!! compat "Input code"
     ```julia
-    CycleSolver.@solve begin
+    using CycleSolver
+
+    @solve begin
 
         evaporator_condenser([stD, st2], [stA, st3])
 
@@ -33,7 +35,7 @@
             
     end
 
-    CycleSolver.PrintResults()
+    PrintResults()
     ```
 #### Output:
 

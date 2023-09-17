@@ -7,7 +7,11 @@ makedocs(
     modules = [CycleSolver],
     pages = [
         "Home" => "index.md",
-        "Manual" => "manual.md",
+        "Manual" => Any[
+            "Define known properties" => "manual_properties.md",
+            "Initialize a cycle" => "manual_initialize.md",
+            "Cycle structure" => "manual_structure.md",
+        ],
         "Examples" => Any[
             "Ideal Simple Rankine Cycle" => "example1.md",
             "Rankine cycle with reheat" => "example2.md",

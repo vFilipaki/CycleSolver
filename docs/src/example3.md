@@ -13,7 +13,9 @@
 
 !!! compat "Input code"
     ```julia
-    CycleSolver.@solve begin
+    using CycleSolver
+    
+    @solve begin
         st3.T = 250 + 273
         st3.p = 1000
         st4.p = 100
@@ -28,7 +30,7 @@
             heater_open([st7, st4], st1)
     end
 
-    CycleSolver.PrintResults()
+    PrintResults()
     ```
     
 #### Output:
