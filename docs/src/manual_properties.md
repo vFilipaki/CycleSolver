@@ -1,5 +1,7 @@
 # Define known properties
 
+> The cycle structure and the known properties must be defined entirely within the `@solve` macro, following the syntax presented in this documentation.
+
 To define properties that are already known to the system, you must specify the state and symbol of the known property, following the table below.
 
 > | Property thermodynamics        | Unit                 | Symbol of attributes of the state    |

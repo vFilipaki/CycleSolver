@@ -11,6 +11,7 @@ makedocs(
             "Define known properties" => "manual_properties.md",
             "Initialize a cycle" => "manual_initialize.md",
             "Cycle structure" => "manual_structure.md",
+            "Results visualization" => "manual_view.md",
         ],
         "Examples" => Any[
             "Ideal Simple Rankine Cycle" => "example1.md",
