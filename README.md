@@ -70,15 +70,34 @@ How to cite this project:
 
 ## Example
 
-### Ideal Simple Rankine Cycle
-
-| Cycle data                               | 
-|------------------------------------------|
-| ![](./docs/src/assets/ex1.png)      |
-> **Known properties:**
-> * Temperature at the boiler outlet 250 °C;
-> * Pressure before turbine 1000 kPa;
-> * Pressure after turbine 10 kPa.
+<table>
+  <thead>
+    <tr>
+      <th>
+          <h3 align="center">Cycle data - Ideal Simple Rankine Cycle</h3>
+      </th>
+    </tr>
+  </thead>
+  <tbody>    
+    <tr>
+        <td>
+          <img src="./docs/src/assets/ex1.png" width="400" height="auto">
+        </td>     
+    </tr>    
+    <tr>
+      <td>
+          Known properties:
+      </td>     
+    </tr>
+    <tr>
+      <td>
+        > Temperature at the boiler outlet 250 °C;<br>
+        > Pressure before turbine 1000 kPa;<br>
+        > Pressure after turbine 10 kPa.<br>
+      </td>     
+    </tr>    
+  </tbody>
+</table>
 
 ### Input code
 
@@ -163,10 +182,8 @@ PrintResults()
 <br>
 
 <div align="center">
-    <img src="docs/src/assets/gr1.png" width="650" height="auto">
+    <img src="docs/src/assets/gr1.png" width="500" height="auto">
 </div>
-
-<br>
 
 <h3 align="center">Cycle Properties:</h3>
 
