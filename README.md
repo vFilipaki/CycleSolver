@@ -67,3 +67,144 @@ How to cite this project:
   url          = {https://github.com/vFilipaki/CycleSolver.jl},
 }
 ```
+
+## Example
+
+### Ideal Simple Rankine Cycle
+
+| Cycle data                               | 
+|------------------------------------------|
+| ![](./docs/src/assets/ex1.png)      |
+> **Known properties:**
+> * Temperature at the boiler outlet 250 °C;
+> * Pressure before turbine 1000 kPa;
+> * Pressure after turbine 10 kPa.
+
+### Input code
+
+```julia
+  using CycleSolver
+  
+  @solve begin
+      st3.T = 250 + 273
+      st3.p = 1000
+      st1.p = 10
+
+      newCycle[]
+          pump(st1, st2)
+          boiler(st2, st3)
+          turbine(st3, st4)
+          condenser(st4, st1) 
+  end
+
+  PrintResults()
+```
+
+### Output:
+
+<h2 align="center">1- CYCLE [water]</h2>
+<table align="center">
+  <thead>
+    <tr class = "header headerLastRow">
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">State<br>Name</th>
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">T [K]</th>
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">P [kPa]</th>
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">h [kJ/kg]</th>
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">s [kJ/kg.K]</th>
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">x</th>
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">ṁ [kg/s]</th>
+      <th style = "color: black; text-align: center; padding: 8px; font-size: 130%;">Mass-flux<br>fraction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">st1</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">318.956</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">10.0</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">191.806</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">0.6492</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">0.0</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;"></td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">1.0</td>
+    </tr>
+    <tr>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">st2</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">318.989</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">1000.0</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">192.806</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">0.6492</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;"></td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;"></td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">1.0</td>
+    </tr>
+    <tr>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">st3</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">523.0</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">1000.0</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">2942.79</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">6.9258</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;"></td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;"></td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">1.0</td>
+    </tr>
+    <tr>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">st4</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">318.956</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">10.0</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">2193.78</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">6.9258</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">0.8369</td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;"></td>
+      <td style = "text-align: left; padding: 8px; font-size: 130%;">1.0</td>
+    </tr>
+  </tbody>
+</table>
+
+<div align="center">
+    <img src="" width="200" height="200">
+</div>
+
+<table align="center">
+  <thead>
+    <tr class = "header headerLastRow">
+      <th style = "color: black; text-align: center; padding: 11px; font-size: 130%;"></th>
+      <th style = "color: black; text-align: center; padding: 11px; font-size: 130%;">Total</th>
+      <th style = "color: black; text-align: center; padding: 11px; font-size: 130%;">Component</th>
+      <th style = "color: black; text-align: center; padding: 11px; font-size: 130%;">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">qin<BR>Q̇in</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">2749.9849 kJ/kg<BR>0.0 kW</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">boiler:<BR>   st2 &gt;&gt; st3</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">2749.9849 kJ/kg<BR></td>
+    </tr>
+    <tr>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">qout<BR>Q̇out</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">2001.9783 kJ/kg<BR>0.0 kW</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">condenser:<BR>   st4 &gt;&gt; st1</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">2001.9783 kJ/kg<BR></td>
+    </tr>
+    <tr>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">win<BR>Ẇin</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">1.0 kJ/kg<BR>0.0 kW</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">pump:<BR>   st1 &gt;&gt; st2</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">1.0 kJ/kg<BR></td>
+    </tr>
+    <tr>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">wout<BR>Ẇout</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">749.0066 kJ/kg<BR>0.0 kW</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">turbine:<BR>   st3 &gt;&gt; st4</td>
+      <td style = "text-align: left; padding: 11px; font-size: 130%;">749.0066 kJ/kg<BR></td>
+    </tr>
+  </tbody>
+</table>
+
+<table align="center">
+  <thead>
+    <tr class = "header headerLastRow">
+      <th style = "color: black; text-align: center; padding: 11px; font-size: 130%;"><h3 align="center">Thermal efficiency (n) = 27.2004 %</h3></th>
+    </tr>
+  </thead>
+</table>
