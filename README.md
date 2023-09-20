@@ -160,9 +160,15 @@ How to cite this project:
   </tbody>
 </table>
 
+<br>
+
 <div align="center">
-    <img src="" width="200" height="200">
+    <img src="docs/src/assets/gr1.png" width="650" height="auto">
 </div>
+
+<br>
+
+<h3 align="center">Cycle Properties:</h3>
 
 <table align="center">
   <thead>
