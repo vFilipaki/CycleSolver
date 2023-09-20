@@ -20,7 +20,7 @@ julia> Pkg.add("CycleSolver")
 ```
 
 Additionally, you have the option to use the `CycleSolver.jl` package in an online environment, without the need for any local software installation. You can access it through the following link:
- * [CycleSolver Online](https://mybinder.org/v2/gh/vFilipaki/CycleSolver.jl/v0.2.0)
+ * [CycleSolver Online](https://mybinder.org/v2/gh/vFilipaki/CycleSolver.jl/v0.3.0)
  
 ## Citations
 
