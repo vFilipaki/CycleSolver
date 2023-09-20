@@ -10,7 +10,7 @@
     <a href="https://vfilipaki.github.io/CycleSolver.jl/stable/"><img src="https://img.shields.io/badge/docs-stable-blue.svg"></a>
     <a href="https://codecov.io/gh/vFilipaki/CycleSolver.jl"><img src="https://codecov.io/gh/vFilipaki/CycleSolver.jl/graph/badge.svg?token=XA1IQOY99S)"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
-    <a href="https://mybinder.org/v2/gh/vFilipaki/CycleSolver.jl/v0.2.0"><img src="https://mybinder.org/badge_logo.svg"></a>
+    <a href="https://mybinder.org/v2/gh/vFilipaki/CycleSolver.jl/v0.3.0"><img src="https://mybinder.org/badge_logo.svg"></a>
     <a href="https://juliahub.com/ui/Packages/General/CycleSolver"><img src="https://juliahub.com/docs/General/CycleSolver/stable/version.svg"></a>
     <br />
     <br />
@@ -45,7 +45,7 @@ julia> using Pkg
 julia> Pkg.add("CycleSolver")
 ```
 Additionally, you have the option to use the `CycleSolver.jl` package in an online environment, without the need for any local software installation. You can access it through the following link:
- * [CycleSolver Online](https://mybinder.org/v2/gh/vFilipaki/CycleSolver.jl/v0.2.0)
+ * [CycleSolver Online](https://mybinder.org/v2/gh/vFilipaki/CycleSolver.jl/v0.3.0)
 
 ## Documentation
 
