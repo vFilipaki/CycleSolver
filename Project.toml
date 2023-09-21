@@ -12,18 +12,18 @@ PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 
 [compat]
-julia = "^1.8"
-Symbolics = "5"
-PrettyTables = "2"
-Plots = "1"
-DocumenterTools = "^0.1.16"
-Documenter = "^0.27.24"
 CoolProp = "^0.1.0"
+Documenter = "^0.27.24, 1"
+DocumenterTools = "^0.1.16"
+Plots = "1"
+PrettyTables = "2"
+Symbolics = "5"
+julia = "^1.8"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 CoolProp = "e084ae63-2819-5025-826e-f8e611a84251"
+Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "Symbolics", "CoolProp"]
