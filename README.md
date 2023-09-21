@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://vfilipaki.github.io/CycleSolver.jl/stable/">
     <img src="https://github.com/vFilipaki/CycleSolver.jl/blob/main/docs/src/assets/logo.png?raw=true" alt="Logo" width="200" height="200">
   </a>
 
