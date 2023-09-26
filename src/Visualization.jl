@@ -272,8 +272,8 @@ function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
                     newC = RGBA{Float64}(colors[2].r, colors[2].g, colors[2].b, 0.4)
                     plot!(s, t, lw=1, color = newC)
                     txtP = string(round(Int, k), " KPa")
-                    # annotate!(s[end], t[end], text("█"^(length(txtP)÷2+1), :white, :center, :center, 6, rotation = 45))
-                    # annotate!(s[end], t[end], text(txtP, txtColor, :center, :center, 5, rotation = 45))
+                    annotate!(s[end], t[end], text("█"^(length(txtP)÷2+1), :white, :center, :center, 6, rotation = 45))
+                    annotate!(s[end], t[end], text(txtP, txtColor, :center, :center, 5, rotation = 45))
                 end            
             end
         end
