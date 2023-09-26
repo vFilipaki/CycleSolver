@@ -14,7 +14,7 @@
     <a href="https://juliahub.com/ui/Packages/General/CycleSolver"><img src="https://juliahub.com/docs/General/CycleSolver/stable/version.svg"></a>
     <br />
     <br />
-    Package for solving thermodynamic cycles in steady state 
+    Package for solving steady state thermodynamic cycles
     <br />
     <a href="https://vfilipaki.github.io/CycleSolver.jl/stable/"><strong>Explore the docs »</strong></a>
     <br />
