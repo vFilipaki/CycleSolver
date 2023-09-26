@@ -65,7 +65,7 @@ function SolverWithHypotheses(tempVarZ, solutionFinded)
     if length(unsolvedEquations) <= length(unsolvedVarsAndStates) - 1
         return nothing
     end
-    println("~> ", unsolvedVarsAndStates)
+    
     States2guess = Any[]
     for i in unsolvedVarsAndStates
         valuated = eval(i)
