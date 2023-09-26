@@ -248,7 +248,7 @@ end
     @test string(CycleSolver.unsolvedEquations[1].Eq) ==
     "(1//5)*(5 - 5m_fractionVars[1, 1]) ~ 0.3"
     @test string(CycleSolver.unsolvedEquations[2].Eq) ==
-    "5st2Stts[3] ~ 5st3Stts[3]*m_fractionVars[1, 1]"
+    "5st2Stts[3] ~ 5m_fractionVars[1, 1]*st3Stts[3]"
 end
 
 @testset "massFlowManager.test.jl: Mass setup with mass not defined" begin
@@ -293,7 +293,7 @@ end
     @test string(CycleSolver.unsolvedEquations[2].Eq) ==
     "1 - m_fractionVars[1, 1] ~ 0.3"
     @test string(CycleSolver.unsolvedEquations[3].Eq) ==
-    "st2Stts[3] ~ st3Stts[3]*m_fractionVars[1, 1]"
+    "st2Stts[3] ~ m_fractionVars[1, 1]*st3Stts[3]"
 end
 
 @testset "massFlowManager.test.jl: Mass flux evaluation" begin

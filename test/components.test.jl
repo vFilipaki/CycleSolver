@@ -34,7 +34,7 @@ end
             "st6Stts[4] ~ st4Stts[4]",
             "stAuxStts[1, 4] ~ st7Stts[4]",
             "stAuxStts[1, 2] ~ st8Stts[2]",
-            "st8Stts[3] ~ st7Stts[3] - 1.25(st7Stts[3] - stAuxStts[1, 3])"
+            "st8Stts[3] ~ -1.25(st7Stts[3] - stAuxStts[1, 3]) + st7Stts[3]"
         ]
         for i in 1:length(CycleSolver.unsolvedEquations)
             @test string(CycleSolver.unsolvedEquations[i].Eq) ==
@@ -84,7 +84,7 @@ end
             "st6Stts[4] ~ st4Stts[4]",
             "stAuxStts[1, 4] ~ st7Stts[4]",
             "stAuxStts[1, 2] ~ st8Stts[2]",
-            "st8Stts[3] ~ st7Stts[3] - 0.8(st7Stts[3] - stAuxStts[1, 3])",
+            "st8Stts[3] ~ -0.8(st7Stts[3] - stAuxStts[1, 3]) + st7Stts[3]",
             "st12Stts[4] ~ st11Stts[4]",
             "st13Stts[4] ~ st11Stts[4]"
         ]
@@ -481,7 +481,7 @@ end
             "st6Stts[4] ~ st4Stts[4]",
             "stAuxStts[1, 4] ~ st7Stts[4]",
             "stAuxStts[1, 2] ~ st8Stts[2]",
-            "st8Stts[3] ~ st7Stts[3] - 1.25(st7Stts[3] - stAuxStts[1, 3])"
+            "st8Stts[3] ~ -1.25(st7Stts[3] - stAuxStts[1, 3]) + st7Stts[3]"
         ]
         for i in 1:length(CycleSolver.unsolvedEquations)
             @test string(CycleSolver.unsolvedEquations[i].Eq) ==

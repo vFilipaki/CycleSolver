@@ -67,7 +67,7 @@ end
     @test CycleSolver.unsolvedEquations[end] isa CycleSolver.MathEq
     @test length(CycleSolver.unsolvedEquations[end].vars) == 7
     @test string(CycleSolver.unsolvedEquations[end].Eq) == 
-    "c1Vars*c7Vars*(c4Vars + c3Vars*c5Vars) ~ c4Vars*c6Vars + c2Vars*c5Vars*c7Vars + c3Vars*c5Vars*c6Vars"
+    "c1Vars*(c4Vars + c3Vars*c5Vars)*c7Vars ~ c4Vars*c6Vars + c2Vars*c5Vars*c7Vars + c3Vars*c5Vars*c6Vars"
 end
 
 @testset "equations.test.jl: Equation solution" begin
