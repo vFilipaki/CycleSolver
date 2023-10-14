@@ -50,12 +50,13 @@ function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
             txtColor = colors[2]
         end        
         
-        if showStateNames
-            for j in 1:length(name)
-                if name[j] != ""
-                    annotate!(s[j], t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
-                    annotate!(s[j], t[j], text(name[j], txtColor, :center, :center, 8))
-        end end end
+        for j in 1:length(name)
+            if showStateNames && name[j] != ""
+                annotate!(s[j], t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
+                annotate!(s[j], t[j], text(name[j], txtColor, :center, :center, 8))
+            elseif !showStateNames
+                scatter!([s[j]], [t[j]], mc=:black, ms=2.5)
+        end end
         
         fluidTemp = SystemCycles[c].states[1].fluid
 
@@ -161,7 +162,7 @@ function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
                         push!(s, tTemp)
                         push!(t, PropsSI("T", "H", localSt2.h * 1000, "S", tTemp * 1000, fluidTemp))
                     end
-                elseif length(cycles) == 1
+                elseif length(cycles) == 1 && abs(localSt1.T-localSt2.T) > 1
                     newT = PropsSI("T", "P", localSt2.p * 1000, "S", localSt1.s * 1000, fluidTemp)
                     newC = RGBA{Float64}(colors[2].r, colors[2].g, colors[2].b, 0.5)
                     plot!([localSt1.s, localSt1.s], [localSt1.T, newT], lw=1, ls=:dash, color = newC)
@@ -225,8 +226,14 @@ function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
                         tRange[2] = PropsSI("Tmax", fluidTemp)
                     end
 
-                    if !isVapor 
-                        tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+
+
+                    if !isVapor
+                        if k * 1000 > PropsSI("Pcrit", fluidTemp)
+                            tRange[1] = PropsSI("Tmin", fluidTemp)
+                        else
+                            tRange[1] = PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
+                        end
                     else
                         try
                             if tRange[1] < PropsSI("T", "P", k * 1000, "Q", 0, fluidTemp)
@@ -281,7 +288,163 @@ function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
     return p
 end
 
-function PrintResults(showStateNames=true, multiplyEntropyByMass=false)
+function PHGraph(cycles, showStateNames, multiplyEntropyByMass)
+    p = plot()
+    for c in cycles
+        flow = [[i[3], i[2]] for i in MassEq1]
+        FlowGraph = Any[]
+        for i in flow
+            for j in i[1]
+                if j in [k.name for k in SystemCycles[c].states]
+                    push!(FlowGraph, Any[j, i[2]])
+                end
+        end end
+
+        states = SystemCycles[c].states
+        t = [i.p for i in states]
+        s = [i.h for i in states]
+        name = [string(i.name) for i in states]
+
+        push!(t, t[1])
+        push!(s, s[1])
+        push!(name, "")
+
+        if showStateNames
+            for i in 1:length(t)-1
+                if name[i] == ""
+                    continue
+                end
+                for j in i+1:length(t)
+                    if (t[j]-t[i])^2+(100*(s[j]-s[i]))^2 < 50
+                        t[i] = (t[i] + t[j])/2
+                        s[i] = (s[i] + s[j])/2
+                        name[i] = string(name[i], " ", name[j])
+                        name[j] = ""
+        end end end end
+
+        colors = [RGBA{Float64}(0, 0, 0, 0.4), RGBA{Float64}(0, 0, 1, 1)]
+        txtColor = RGBA{Float64}(0, 0, 0, 1)
+        if length(cycles) > 1
+            if c == 1
+                colors = [RGBA{Float64}(0, 0, 1, 0.25), RGBA{Float64}(0, 0, 1, 1)]
+            elseif  c == 2
+                colors = [RGBA{Float64}(1, 0, 0, 0.25), RGBA{Float64}(1, 0, 0, 1)]
+            elseif  c == 3
+                colors = [RGBA{Float64}(0, 1, 0, 0.25), RGBA{Float64}(0, 1, 0, 1)]
+            elseif  c == 4
+                colors = [RGBA{Float64}(1, 0, 1, 0.25), RGBA{Float64}(1, 0, 1, 1)]
+            end
+            txtColor = colors[2]
+        end        
+        
+        for j in 1:length(name)
+            if showStateNames && name[j] != ""
+                annotate!(s[j], t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
+                annotate!(s[j], t[j], text(name[j], txtColor, :center, :center, 8))
+            elseif !showStateNames
+                scatter!([s[j]], [t[j]], mc=:black, ms=2.5)
+        end end
+        
+        fluidTemp = SystemCycles[c].states[1].fluid
+
+        AlltRange = Any[SystemCycles[c].states[1].T, SystemCycles[c].states[1].T]
+        isVapor = true
+        for i in SystemCycles[c].states
+            try
+                isVapor &= i.p > PropsSI("P", "T", i.T, "Q", 0, fluidTemp)
+            catch
+            end
+            if i.p > AlltRange[2]
+                AlltRange[2] = i.T
+            end
+            if i.p < AlltRange[1]
+                AlltRange[1] = i.T
+            end
+        end
+        sizeRangeT = AlltRange[2] - AlltRange[1]
+
+        if !isVapor && 
+            !(length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined)
+            res = 20
+            tvec = Array{Any}(nothing, 2*res+1)
+            svec = Array{Any}(nothing, 2*res+1)
+            T0 = PropsSI("Tcrit", fluidTemp)
+            Tmin = max(PropsSI("Tmin", fluidTemp), AlltRange[1] - sizeRangeT*0.4)
+            tvec[res + 1] = PropsSI("P", "T", T0, "Q", 1, fluidTemp) / 1000
+            svec[res + 1] = PropsSI("H", "T", T0, "Q", 1, fluidTemp) / 1000
+
+            for i in 1:res
+                T = T0 - (T0 - Tmin)*(i/res)^2
+                tvec[res + 1 + i] = PropsSI("P", "T", T, "Q", 1, fluidTemp) / 1000
+                tvec[res + 1 - i] = PropsSI("P", "T", T, "Q", 0, fluidTemp) / 1000
+                svec[res + 1 + i] = PropsSI("H", "T", T, "Q", 1, fluidTemp) / 1000
+                svec[res + 1 - i] = PropsSI("H", "T", T, "Q", 0, fluidTemp) / 1000
+            end
+
+            plot!(svec, tvec, color = colors[1])
+        end
+
+        for i in FlowGraph
+            t = Any[]
+            s = Any[]
+            localSt1 = eval(i[1])
+            localSt2 = eval(i[2])
+        
+            push!(t, localSt1.p)
+            push!(s, localSt1.h)
+        
+            if localSt1.p != localSt2.p
+                if abs(localSt1.h - localSt2.h) < 2 ||
+                abs(localSt1.p - localSt2.p) < 2
+                    push!(t, localSt2.p)
+                    push!(s, localSt2.h) 
+                else
+                    stepsP = ceil(Int, abs(localSt2.p-localSt1.p) / 10)
+                    stepsS = (localSt2.s-localSt1.s) / stepsP
+                    j = 0
+                    while j < stepsP
+                        j += 1
+                        pTemp = localSt1.p + j/stepsP * (localSt2.p-localSt1.p)
+                        sTemp = localSt1.s
+                        if abs(localSt2.s-localSt1.s) > 0.001
+                            sTemp += j * stepsS
+                        end
+                        push!(s, PropsSI("H", "P", pTemp * 1000, "S", sTemp * 1000, fluidTemp)/1000)
+                        push!(t, pTemp)
+                    end
+                end
+            else
+                push!(t, localSt2.p)
+                push!(s, localSt2.h)
+            end
+            
+            if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined
+                MainMass = 0
+                for i in SystemCycles[c].states
+                    if i.m > MainMass 
+                        MainMass = i.m                    
+                end end
+
+                for i in 1:length(s)
+                    s[i] *= MainMass
+                end
+            end
+
+            plot!(s, t, color = colors[2])
+        end
+
+        if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined
+            plot!(legend = false, grid = false,
+            xlabel = "[kJ]", ylabel = "P [KPa]")
+        else
+            plot!(legend = false, grid = false,
+            xlabel = "h [kJ/kg]", ylabel = "P [KPa]")
+        end
+    end
+    return p
+end
+
+function PrintResults(graphs=1, showStateNames=true, multiplyEntropyByMass=false)
     str = Any[]
     for i in 1:length(SystemCycles)
         TitleTxt = string(i,"- ")
@@ -385,15 +548,30 @@ function PrintResults(showStateNames=true, multiplyEntropyByMass=false)
         end
 
         #####################################################
-        plotHTML = sprint(show, "text/html", TSGraph([i], showStateNames, multiplyEntropyByMass))
+
+        plotHTML = ""
+        if graphs == 1
+            plotHTML = sprint(show, "text/html", TSGraph([i], showStateNames, multiplyEntropyByMass))
+        elseif graphs == 2
+            plotHTML = sprint(show, "text/html", PHGraph([i], showStateNames, multiplyEntropyByMass))
+        elseif graphs == 3
+            plotHTML = string(
+                "<div style='margin: 5px;'>",
+                sprint(show, "text/html", TSGraph([i], showStateNames, multiplyEntropyByMass)),
+                "</div>",
+                "<div style='margin: 5px;'>",
+                sprint(show, "text/html", PHGraph([i], showStateNames, multiplyEntropyByMass)),
+                "</div>"
+            )             
+        end
 
         #####################################################
 
         push!(str, string("<div style='display: inline-block; padding: 15px; margin: 20px;
         border: 2px solid #666666;'>\n", TitleTxt,
         "<div style='display: flex; justify-content: space-around;'>", propsTb1, "</div>",
-        "<div style='display: flex; justify-content: space-around;
-        padding: 10px; margin: 10px;'>", plotHTML, "</div><div style=' border: 1px solid;'>",
+        "<div style='display: inline-block;
+        padding: 10px; margin: 5px;'>", plotHTML, "</div><div style=' border: 1px solid;'>",
         "<h3 style='text-align: center;margin: 8px;'>Cycle Properties:</h3>",
         "<div style='display: flex; justify-content: space-around;'>", propsTb2, "</div>", nc,
         "</div>\n</div></br>"))        
@@ -455,7 +633,7 @@ function PrintResults(showStateNames=true, multiplyEntropyByMass=false)
             effTxt, round(System.n, digits=4), effTxt2, "</h2>")   
         end
 
-        plotHTML = sprint(show, "text/html", TSGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass))
+        plotHTML = sprint(show, "text/html", PHGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass))
 
         perCycle = string(perCycle, 
                     "<div style=\"display: inline-block; padding: 15px; margin: 20px;",
