@@ -633,14 +633,30 @@ function PrintResults(graphs=1, showStateNames=true, multiplyEntropyByMass=false
             effTxt, round(System.n, digits=4), effTxt2, "</h2>")   
         end
 
-        plotHTML = sprint(show, "text/html", PHGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass))
+        plotHTML = 
+
+        plotHTML = ""
+        if graphs == 1
+            plotHTML = sprint(show, "text/html", TSGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass))
+        elseif graphs == 2
+            plotHTML = sprint(show, "text/html", PHGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass))
+        elseif graphs == 3
+            plotHTML = string(
+                "<div style='margin: 5px;'>",
+                sprint(show, "text/html", TSGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass)),
+                "</div>",
+                "<div style='margin: 5px;'>",
+                sprint(show, "text/html", PHGraph(collect(1:length(SystemCycles)), showStateNames, multiplyEntropyByMass)),
+                "</div>"
+            )             
+        end
 
         perCycle = string(perCycle, 
                     "<div style=\"display: inline-block; padding: 15px; margin: 20px;",
                     "border: 2px solid;\"><h1 style=\"text-align: center;
                     margin: -8px;\">SYSTEM PROPERTIES</h1>",
-                    "<div style='display: flex; justify-content: space-around;
-                    padding: 10px; margin: 10px;'>", plotHTML, "</div>",
+                    "<div style='display: inline-block;
+                    padding: 10px; margin: 5px;'>", plotHTML, "</div>",
                     "<div style=' border: 1px solid;'>",
                     "<div style='display: flex; justify-content: space-around; margin: 20px;'>",
                     propsTb3, "</div>", nc, "</div>"
