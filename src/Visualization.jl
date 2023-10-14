@@ -684,4 +684,4 @@ function PrintResults(graphs=1, showStateNames=true, multiplyEntropyByMass=false
     border: 0.5px solid #666666;'>", perCycle, "</div>")
 
     display("text/html", perCycle)    
-end
+end 
