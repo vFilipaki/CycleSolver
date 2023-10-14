@@ -6,11 +6,11 @@ After the cycle's programming is performed within the macro `@solve`, the result
 
 For a better visualization of the system's graph, it's possible to add some attributes in its generation, modifications to the `PrintResults()` function, which is composed of two optional attributes: `PrintResults(graphs=1, showStateNames=true, multiplyEntropyByMass=false)`. 
 
-* `graphs`: Defines which graphics will be displayed.
+* `graphs`: Defines which graphs will be displayed according to the number entered:
 
     1. Shows T-s graph.
     2. Shows P-h graph.
-    3. Shows T-s and P-h graph.
+    3. Shows T-s and P-h graphs.
 
 * `showStateNames`: Defines if the names of the states appeared in the generated T-s graphs.
 
