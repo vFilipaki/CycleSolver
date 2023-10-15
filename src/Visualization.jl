@@ -50,12 +50,21 @@ function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
             txtColor = colors[2]
         end        
         
+        MainMass = 1
+        if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined       
+            MainMass = 0     
+            for i in SystemCycles[c].states
+                if i.m > MainMass 
+                    MainMass = i.m                    
+            end end
+        end
+
         for j in 1:length(name)
             if showStateNames && name[j] != ""
-                annotate!(s[j], t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
-                annotate!(s[j], t[j], text(name[j], txtColor, :center, :center, 8))
+                annotate!(s[j] * MainMass, t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
+                annotate!(s[j] * MainMass, t[j], text(name[j], txtColor, :center, :center, 8))
             elseif !showStateNames
-                scatter!([s[j]], [t[j]], mc=:black, ms=2.5)
+                scatter!([s[j]] * MainMass, [t[j]], mc=:black, ms=2.5)
         end end
         
         fluidTemp = SystemCycles[c].states[1].fluid
@@ -172,12 +181,6 @@ function TSGraph(cycles, showStateNames, multiplyEntropyByMass)
             end
             
             if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined
-                MainMass = 0
-                for i in SystemCycles[c].states
-                    if i.m > MainMass 
-                        MainMass = i.m                    
-                end end
-
                 for i in 1:length(s)
                     s[i] *= MainMass
                 end
@@ -337,12 +340,21 @@ function PHGraph(cycles, showStateNames, multiplyEntropyByMass)
             txtColor = colors[2]
         end        
         
+        MainMass = 1
+        if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined       
+            MainMass = 0     
+            for i in SystemCycles[c].states
+                if i.m > MainMass 
+                    MainMass = i.m                    
+            end end
+        end
+
         for j in 1:length(name)
             if showStateNames && name[j] != ""
-                annotate!(s[j], t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
-                annotate!(s[j], t[j], text(name[j], txtColor, :center, :center, 8))
+                annotate!(s[j] * MainMass, t[j], text("█"^(length(name[j])÷2+1), :white, :center, :center, 10))
+                annotate!(s[j] * MainMass, t[j], text(name[j], txtColor, :center, :center, 8))
             elseif !showStateNames
-                scatter!([s[j]], [t[j]], mc=:black, ms=2.5)
+                scatter!([s[j]] * MainMass, [t[j]], mc=:black, ms=2.5)
         end end
         
         fluidTemp = SystemCycles[c].states[1].fluid
@@ -419,12 +431,6 @@ function PHGraph(cycles, showStateNames, multiplyEntropyByMass)
             end
             
             if length(cycles) != 1 && multiplyEntropyByMass && SystemCycles[c].massDefined
-                MainMass = 0
-                for i in SystemCycles[c].states
-                    if i.m > MainMass 
-                        MainMass = i.m                    
-                end end
-
                 for i in 1:length(s)
                     s[i] *= MainMass
                 end
