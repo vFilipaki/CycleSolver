@@ -18,20 +18,23 @@ module CycleSolver
         end
         
         SetupMass()
-            
+        
         newValue = true
         while newValue
-            newValue = EquationsSolver(unsolvedEquations)        
-            
+            newValue = EquationsSolver(unsolvedEquations)
+
             newValue |= StatesSolver(unsolvedStates)
 
             newValue |= ManageConditionalEquations(unsolvedConditionalEquation)
-            
+
             if newValue
                 UpdateEquationList(unsolvedEquations)
             elseif length(unsolvedStates) != 0
                 solutionFinded = []
                 SolverWithHypotheses("", solutionFinded)
+                if length(solutionFinded) == 0
+                    throw("System cannot be solved")
+                end
                 newValue = length(solutionFinded) > 0
                 for j in solutionFinded
                     eval(Expr(:(=), j[1], j[2]))
@@ -43,6 +46,14 @@ module CycleSolver
         EvaluateStatesMassFluxFraction()
         EvaluatePropertiesEquations()
         EvaluateFlexHeatProperties()
+        
+        deletList = Any[]        
+        for i in PropsEquations
+            if i[2] < 0.0001 && i[1] in [:Qin, :Qout, :Win, :Wout]
+                push!(deletList, i[3])
+            end            
+        end        
+        filter!(x -> !(x[3] in deletList), PropsEquations)
 
         AssignPropertiesToCycle()
         for cycle in SystemCycles  
@@ -56,7 +67,9 @@ module CycleSolver
         CalculateSystemEfficiency()
 
         EvaluateFindVariables()
+
+        EvaluateImbalance()
     end
 
-    export PrintResults, @solve
+    export PrintResults, PrintImbalance, @solve
 end
