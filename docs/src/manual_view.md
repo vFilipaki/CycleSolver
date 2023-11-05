@@ -28,3 +28,7 @@ Furthermore, each cycle is composed of a series of thermodynamic states. To view
 To access the specific properties of each state, in addition to the syntax presented earlier, it is also possible to obtain the properties with the command `CycleSolver.st1`, which provides access to the properties of the state identified as `st1`. To view the enthalpy of this state, simply use `CycleSolver.st1.h`.
 
 It is important to note that if there is more than one cycle, in addition to the individual properties of each cycle, there will also be properties related to the system of cycles as a whole. These properties can be accessed through the command `CycleSolver.System`. The heat transfer into the system can be viewed with `CycleSolver.System.qin`, while the system efficiency is obtained through `CycleSolver.System.n`.
+
+### Energy/Mass Imbalance and Entropy Generation
+
+To visualize the Energy/Mass Imbalance and Entropy Generation, the `PrintImbalance function` is used, which displays these properties for each component and for the system. To access these properties through code, you can use the variable `CycleSolve.SystemImbalanceAndEntropyGeneration`, which is a list with three values, representing respectively, the Energy Imbalance, Mass Imbalance, and Entropy Generation.
