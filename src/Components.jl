@@ -1,3 +1,5 @@
+SystemComponents = Any[]
+
 function EnergyBalance(inStt, outStt)
     inEq = :($(inStt[1]).m * $(inStt[1]).h)
     for i in inStt[2:end]
@@ -10,6 +12,105 @@ function EnergyBalance(inStt, outStt)
     NewEquation(Expr(:(=), inEq, outEq))
 end
 
+function InsertComponentIntoList(component)
+    inStt = eval(component.args[2])
+    outStt = eval(component.args[3])
+    inStt = Any[i.name for i in inStt]
+    outStt = Any[i.name for i in outStt]
+    if length(inStt) == 1
+        inStt = inStt[1]
+    end
+    if length(outStt) == 1
+        outStt = outStt[1]
+    end
+    push!(SystemComponents, [ManageComponentTag(string(
+        component.args[1], ": ", string(inStt), " >> ", string(outStt))),
+        component.args[2], component.args[3]])
+end
+
+function EvaluateImbalance()
+    totalMassImbalance = 0.0
+    totalEnergyImbalance = 0.0
+    totalEntropyGeneration = 0.0
+    for i in SystemComponents
+        inStt, outStt = [eval(i[2]), eval(i[3])]
+
+        massDefined = true
+
+        inSttProps = Any[]
+        for i in inStt
+            mass = isnothing(i.m) ? i.mFraction : i.m
+            massDefined &= !isnothing(i.m)
+            push!(inSttProps, [i.name, i.h * mass, mass, i.s * mass])
+        end
+        
+        outSttProps = Any[]
+        for i in outStt
+            mass = isnothing(i.m) ? i.mFraction : i.m
+            massDefined &= !isnothing(i.m)
+            push!(outSttProps, [i.name, i.h * mass, mass, i.s * mass])
+        end
+
+        props = Any[0.0, 0.0, 0.0, 0.0] # Q q W w
+
+        for f in fieldnames(CycleSolver.PropertiesStruct)
+            if f != :n 
+                for j in getfield(CycleSolver.System, f)
+                    if j.first == i[1]
+                        fStrg = string(f)                            
+                        value = fStrg[2:end] == "out" ? -j.second : j.second
+                        if fStrg[1:1] == "Q"
+                            props[1] = value
+                        elseif fStrg[1:1] == "q"
+                            props[2] = value
+                        elseif fStrg[1:1] == "W"
+                            props[3] = value
+                        elseif fStrg[1:1] == "w"
+                            props[4] = value
+                        end
+        end end end end
+
+        MassImbalance = 0.0
+        EnergyImbalance = 0.0
+        EntropyGeneration = 0.0
+
+        for i in inSttProps
+            MassImbalance += i[3]
+            MassImbalance += i[2]
+            EntropyGeneration -= i[4]
+        end
+        for i in outSttProps
+            MassImbalance -= i[3]
+            MassImbalance -= i[2]
+            EntropyGeneration += i[4]
+        end
+
+        if massDefined
+            MassImbalance += props[1] + props[3]
+        else
+            MassImbalance += props[2] + props[4]
+        end
+        
+        totalMassImbalance += MassImbalance
+        totalEnergyImbalance += EnergyImbalance
+        totalEntropyGeneration += EntropyGeneration
+
+        push!(i, [
+            inSttProps,
+            outSttProps,
+            props,
+            MassImbalance,
+            EnergyImbalance,
+            massDefined,
+            EntropyGeneration
+        ])
+    end
+    global SystemImbalanceAndEntropyGeneration = [
+        totalEnergyImbalance,
+        totalMassImbalance,
+        totalEntropyGeneration
+    ]
+end
 
 function GetStatesSymbols(inStt, outStt)
     return [
@@ -17,6 +118,16 @@ function GetStatesSymbols(inStt, outStt)
         Any[i.name for i in outStt]
     ]
 end
+
+function generic_component(inStt, outStt, props=nothing)
+    inStt, outStt = GetStatesSymbols(inStt, outStt)
+    MassFlow(Any[inStt[1]], Any[outStt[1]])
+
+    if !isnothing(props)
+        for i in props
+            push!(PropsEquations, Any[i.args[1], i.args[2],
+            [string("generic_component: ", string(inStt), " >> ", string(outStt)), inStt[1]]])    
+end end end 
 
 function pump(inStt, outStt, n = 100)
     inStt, outStt = GetStatesSymbols(inStt, outStt)    
@@ -429,7 +540,7 @@ function combustion_chamber(inStt, outStt)
     string("combustion_chamber: ", string(inStt), " >> ", string(outStt))])     
 end
 
-function heater_exchanger(inStt, outStt, effect = nothing)
+function heater_exchanger(inStt, outStt, effect = nothing, higherCapacityRate = nothing)
     inStt, outStt = GetStatesSymbols(inStt, outStt)
     if length(inStt) != length(outStt) || length(inStt) != 2
         throw(DomainError("The number of input and output states must be equal to 2 in the heater_exchanger."))
@@ -477,8 +588,15 @@ function heater_exchanger(inStt, outStt, effect = nothing)
 
         effect /= 100                     
 
+        conditionEq = nothing
+        if isnothing(higherCapacityRate)
+            conditionEq = :(abs($(outStt[2]).h - $(inStt[2]).h) * $(inStt[2]).m > abs($(outStt[1]).h - $(inStt[1]).h) * $(inStt[1]).m)
+        else
+            conditionEq = higherCapacityRate == 2
+        end
+
         push!(unsolvedConditionalEquation, ConditionalMathEq(
-            :(abs($(outStt[2]).h - $(inStt[2]).h) * $(inStt[2]).m > abs($(outStt[1]).h - $(inStt[1]).h) * $(inStt[1]).m), 
+            conditionEq, 
             [
                 :($(outStt[1]).h = $(inStt[1]).h + ($(inStt[2]).m / $(inStt[1]).m) * $effect *
                     ($(inStt[2]).h - $(Expr(:ref, :stAux, indexProp)).h)),

@@ -690,4 +690,151 @@ function PrintResults(graphs=1, showStateNames=true, multiplyEntropyByMass=false
     border: 0.5px solid #666666;'>", perCycle, "</div>")
 
     display("text/html", perCycle)    
-end 
+end
+
+function PrintImbalance()
+    str = Any[]
+
+    TotalTxt = string("<h1 style='display: block; text-align: center; border: 1px solid #666666;",
+        "margin: -17px; margin-bottom: 20px; padding: 10px'> SYSTEM </h1>")
+
+    DataStates = Any[]
+    txt = Any[
+        "Energy Imbalance",
+        round(SystemImbalanceAndEntropyGeneration[1], digits=4)
+    ]
+    push!(DataStates, txt)
+    txt = Any[
+        "Mass Imbalance",
+        round(SystemImbalanceAndEntropyGeneration[2], digits=4)
+    ]
+    push!(DataStates, txt)
+    txt = Any[
+        "Entropy Generation",
+        round(SystemImbalanceAndEntropyGeneration[3], digits=4)
+    ]
+    push!(DataStates, txt)
+
+    DataStates = mapreduce(permutedims, vcat, DataStates)
+
+    io2 = IOBuffer()
+    pretty_table(backend = Val(:html), tf = tf_html_simple,
+    alignment=:l, linebreaks=true, io2, DataStates; header=(
+        ["", ""]
+        ), standalone = true)
+    propsTb2 = String(take!(io2))
+
+    propsTb2 = replace(propsTb2, "left;" => "left; padding: 8px; font-size: 130%;")
+    propsTb2 = replace(propsTb2, "th style = \"text-align: left" => "th style = \"text-align: center;")
+    propsTb2 = replace(propsTb2, "collapse;" => "collapse; color: black;")
+    propsTb2 = string("<div style = \"display: inline-block; border: 1px solid #666666; line-height: 1.4;\">", propsTb2, "</div>")
+    #####################################################
+
+    push!(str, string("<div style='display: inline-block; padding: 15px; margin: 15px;
+    border: 2px solid #666666;'>\n", TotalTxt,
+    "<div style='display: flex; justify-content: space-around;'>", propsTb2, "</div>",
+    "</div></br>"))        
+    
+    for i in SystemComponents
+
+        TitleTxt = string("<h3 style='display: block; text-align: center; border: 1px solid #666666;",
+        "margin: -17px; margin-bottom: 20px; padding: 10px'>", i[1],"</h3>")
+        #####################################################
+        DataStates = Any[]
+
+        txt = Any["Input States", "", "", "", ""]
+        for j in 1:length(i[4][1])
+            txt[1] = string(txt[1], "\n\n")
+            txt[2] = string(txt[2], string(i[4][1][j][1]), "\n")
+            txt[3] = string(txt[3], round(i[4][1][j][2], digits=4), "\n")
+            txt[4] = string(txt[4], round(i[4][1][j][3], digits=4), "\n")
+            txt[5] = string(txt[5], round(i[4][1][j][4], digits=4), "\n")
+        end
+        push!(DataStates, txt)
+
+        txt = Any["Output States", "", "", "", ""]
+        for j in 1:length(i[4][2])
+            txt[1] = string(txt[1], "\n\n")
+            txt[2] = string(txt[2], string(i[4][2][j][1]), "\n")
+            txt[3] = string(txt[3], round(i[4][2][j][2], digits=4), "\n")
+            txt[4] = string(txt[4], round(i[4][2][j][3], digits=4), "\n")
+            txt[5] = string(txt[5], round(i[4][2][j][4], digits=4), "\n")
+        end
+        push!(DataStates, txt)
+
+        if i[4][6]
+            txt = Any[
+                "Properties\n\n",
+                "\nQ̇\nẆ",
+                string("\n",
+                    round(i[4][3][1], digits=4), "\n",
+                    round(i[4][3][3], digits=4)), 
+                "\n\n\n",
+                "\n\n\n"
+            ]
+            push!(DataStates, txt)
+        else
+            txt = Any[
+                "Properties\n\n",
+                "\nq\nw",
+                string("\n",
+                    round(i[4][3][2], digits=4), "\n",
+                    round(i[4][3][4], digits=4)), 
+                "\n\n\n",
+                "\n\n\n"
+            ]
+            push!(DataStates, txt)
+        end
+
+        txt = Any[
+            "Imbalance\n(Energy/Mass)",
+            "\n\n",
+            string("\n",
+                abs(round(i[4][5], digits=4))), 
+            string("\n",
+                abs(round(i[4][4], digits=4))),
+            "\n\n"
+        ]
+        push!(DataStates, txt)
+
+        
+        txt = Any[
+            "Entropy\nGeneration",
+            "\n\n",
+            "\n\n", 
+            "\n\n",
+            round(i[4][7], digits=4)
+        ]
+        push!(DataStates, txt)
+
+        DataStates = mapreduce(permutedims, vcat, DataStates)
+
+        io = IOBuffer()
+        pretty_table(backend = Val(:html), tf = tf_html_simple,
+        alignment=:l, linebreaks=true, io, DataStates; header=(
+            ["", "", "[kg . kJ/kg]", "[kg/s]", "[kg . kJ/kg.K]"]
+            ), standalone = true)
+        propsTb1 = String(take!(io))
+
+        propsTb1 = replace(propsTb1, "left;" => "left; padding: 8px; font-size: 130%;")
+        propsTb1 = replace(propsTb1, "th style = \"text-align: left" => "th style = \"text-align: center;")
+        propsTb1 = replace(propsTb1, "collapse;" => "collapse; color: black;")
+        propsTb1 = string("<div style = \"display: inline-block; border: 1px solid #666666; line-height: 1.4;\">", propsTb1, "</div>")
+        #####################################################
+
+        push!(str, string("<div style='display: inline-block; padding: 15px; margin: 15px;
+        border: 2px solid #666666;'>\n", TitleTxt,
+        "<div style='display: flex; justify-content: space-around;'>", propsTb1, "</div>",
+        "</div></br>"))        
+    end        
+
+    perCycle = ""
+    for i in str
+        perCycle = string(perCycle, i)
+    end
+    
+    perCycle = string("<div style='display: inline-block; margin: 1px; text-align: center;
+    border: 0.5px solid #666666;'>", perCycle, "</div>")
+
+    display("text/html", perCycle)    
+end

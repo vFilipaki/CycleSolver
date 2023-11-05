@@ -56,8 +56,9 @@ function NewEquation(eq)
         end
         for i in eq.args[3].args
             createState(i)
-        end
+        end        
         eval(eq)
+        InsertComponentIntoList(eq)
     end
 end 
 

@@ -2,6 +2,7 @@ System = nothing
 
 find = :find
 findVariables = Any[]
+SystemImbalanceAndEntropyGeneration = []
 
 function EvaluateFindVariables()
     for i in 1:length(findVariables)
@@ -75,7 +76,9 @@ function ClearSystem()
     clearMassVariables()
     ClearProperties()    
     ClearCycles()
-        
+
+    global SystemImbalanceAndEntropyGeneration = []
+    global SystemComponents = Any[]
     global System = PropertiesStruct()
     global findVariables = Any[]
 end
