@@ -28,7 +28,7 @@ function StatesSolver(states)
         knownProperties = []
 
         for j in 1:5
-            if !(values[j] isa Num)
+            if values[j] isa Float64 || values[j] isa Int
                 push!(knownProperties, j)
         end end
         blacklist = [[2, 4], [3, 4], [3, 5]]
