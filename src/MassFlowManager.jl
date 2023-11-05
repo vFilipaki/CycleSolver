@@ -291,14 +291,76 @@ function GenearateMassEquations(cycleStatesSymbols, RootStt)
     return MassEq2
 end
 
+function ManageMassFractionEqualityEquations()
+    deletList = []
+    for i in 1:length(unsolvedEquations)
+        if (length(unsolvedEquations[i].vars) == 2 &&
+            unsolvedEquations[i].vars[1] isa Expr && (unsolvedEquations[i].vars[1].head == :.) && 
+            unsolvedEquations[i].vars[1].args[end] == QuoteNode(:mFraction) &&
+            unsolvedEquations[i].vars[2] isa Expr && (unsolvedEquations[i].vars[2].head == :.) && 
+            unsolvedEquations[i].vars[2].args[end] == QuoteNode(:mFraction))
+
+            inEquation = [-1, -1]
+            for k in 1:length(massEquations)
+                if (length(massEquations[k].vars) == 0) continue end
+                                    
+                if (massEquations[k].vars[1].args[1] == unsolvedEquations[i].vars[1].args[1])
+                    inEquation[1] = k
+                    if(inEquation[2] != -1) break end
+                end
+
+                if (massEquations[k].vars[1].args[1] == unsolvedEquations[i].vars[2].args[1])
+                    inEquation[2] = k
+                    if (inEquation[1] != -1) break end
+                end
+            end
+            newBsEq = false;
+            local ret
+            local eq
+            if (inEquation[1] != -1 && inEquation[2] == -1)
+                ret = MathEq()
+                eq = Expr(:call, :(~), 
+                    :($(unsolvedEquations[i].vars[2].args[1]).m),
+                    massEquations[inEquation[1]].Eq.rhs)                    
+                newBsEq = true;
+            elseif (inEquation[1] == -1 && inEquation[2] != -1)
+                ret = MathEq()
+                eq = Expr(:call, :(~), 
+                    :($(unsolvedEquations[i].vars[1].args[1]).m),
+                    massEquations[inEquation[2]].Eq.rhs)
+                newBsEq = true;                    
+            end
+            if (newBsEq)
+                eq = Symbolics.simplify(CrossMultiplication(eval(eq)); expand=true)
+                ret.Eq = eq
+                ret.vars = Any[]
+                ret.vars = GetEquationVariables(Meta.parse(string(eq.lhs)))
+                ret.priority = false
+                for k in 1:length(massEquations)
+                    if contains(string(massEquations[k].Eq), string(eq.lhs))     
+                        massEquations[k].Eq = substitute(massEquations[k].Eq, Dict([eval(ret.vars[1]) => ret.Eq.rhs]))
+                        massEquations[k].Eq = Symbolics.simplify(CrossMultiplication(eval(massEquations[k].Eq)); expand=true)  
+                    end
+                end
+
+                push!(massEquations, ret)
+                push!(deletList, i)                    
+            end
+        end
+    end
+    for i in length(deletList):-1:1
+        deleteat!(unsolvedEquations, deletList[i])
+    end
+end
+
 function SetupMass()
     cycleStatesSymbols = Any[]
     MassCopy = deepcopy(massParent)
     divideStatesPerCycle(cycleStatesSymbols)
-    RootStt = FindRootState(MassCopy, cycleStatesSymbols)    
+    RootStt = FindRootState(MassCopy, cycleStatesSymbols)
     MainCycleMass(cycleStatesSymbols)
     GenearateMassEquations(cycleStatesSymbols, RootStt)
-    
+    ManageMassFractionEqualityEquations()
     for i in 1:length(SystemCycles)
         SystemCycles[i].states = [eval(j) for j in cycleStatesSymbols[i]]
         for j in cycleStatesSymbols[i]
@@ -339,12 +401,14 @@ function SubstituteMassInEq(Equation)
                     Eq2Expr = Meta.parse(string(Equation.Eq))
                     newValue = string(k.Eq.rhs)
                     newValue = replace(newValue, "Vars" => "")
-
                     cycleMass = filter(x -> eval(j.args[1]) in x.states, SystemCycles)[1].mainMassFlux
-                    if (cycleMass == -1)
-                        indexSt = findfirst("m_Cycle[", newValue)[1]
-                        indexEnd = indexSt - 1 + findfirst("]", newValue[indexSt:end])[1]
-                        newValue = replace(newValue, newValue[indexSt:indexEnd] => "1")
+                    if (cycleMass == -1)                        
+                        indexSt = findfirst("m_Cycle[", newValue)
+                        if !isnothing(indexSt)
+                            indexSt = indexSt[1]
+                            indexEnd = indexSt - 1 + findfirst("]", newValue[indexSt:end])[1]
+                            newValue = replace(newValue, newValue[indexSt:indexEnd] => "1")
+                        end
                     else
                         newValue = string("(", newValue, ")/", cycleMass)
                     end
